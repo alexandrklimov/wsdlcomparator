@@ -20,9 +20,9 @@ Finding out such wide tree of changes is very difficult task especially if a cha
 
 ## Particularities
 
-The current version of this library is based on Apache XmlSchema 2.x\\
-The current version of this library is based on a well tested code is used in a production invironment, but one contains a lot of not well tested changes.
-The current version of tthe library does not process XSD group element and list-restriction in both simpleType and simpleContent.
+The current version of this library is based on Apache XmlSchema 2.x  
+The current version of this library is based on a well tested code is used in a production invironment, but one contains a lot of not well tested changes.  
+The current version of tthe library does not process XSD group element and list-restriction in both simpleType and simpleContent.  
 May be I overlook something :)
 
 
