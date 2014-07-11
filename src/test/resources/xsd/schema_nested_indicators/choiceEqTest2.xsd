@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema">
+
+    <complexType name="testType">
+        <sequence>
+            <element name="seqElem1" type="int"/>
+            <element name="seqElem2" type="int"/>
+            <choice>
+                <sequence>
+                    <element name="eL1" type="string"/>
+                    <element name="eL2" type="string"/>
+                </sequence>
+                <sequence>
+                    <element name="eL1" type="string"/>
+                    <element name="eL3" type="string"/>
+                </sequence>
+                <sequence>
+                    <element name="eL1" type="string"/>
+                    <element name="eL2" type="string"/>
+                    <element name="eL3" type="string"/>
+                </sequence>
+                <sequence>
+                    <element name="eL2" type="string"/>
+                    <element name="eL3" type="string"/>
+                    <choice>
+                        <element name="eL12" type="string"/>
+                        <element name="eL13" type="string"/>
+                    </choice>
+                </sequence>
+            </choice>
+            <element name="seqElem3" type="int"/>
+        </sequence>
+    </complexType>
+
+</schema>

@@ -1,0 +1,208 @@
+House-\
+	|
+	|_room
+	|
+	|_floors
+	|
+	|_address
+
+House_Builder-\
+	|
+	|_address
+	|
+	|_built_houses
+
+Address-\
+	|
+	|_house_number
+	|_street
+	|_city
+	|_country
+	|_phone
+
+Room-\
+	|
+	|_type
+	|
+	|_size
+
+
+generic.xsd - generic XSD
+_____________________________
+	Room
+		particleContent:sequence
+			type:string
+			size:int
+
+	Address
+		particleContent:sequence
+			house_number:int
+			street:string
+			city:string
+			country:string
+			phone:string
+
+	House
+		particleContent:sequence
+			room:Room[1..*]
+			floors:int
+			address:Address
+
+	House_Builder
+		particleContent:sequence
+			address:Address
+			built_houses:House[0..*]
+_____________________________
+_____________________________
+
+1.XSD
+_____________________________
+New particle content for Room:
+    particleContent:sequence
+        particleContent:choice
+            type:string
+            typeIndex:int
+        size:int
+Affect chain: Room->House->House_Builder
+        -----------------
+Room
+		particleContent:sequence
+		    particleContent:choice
+			    type:string
+			    typeIndex:int
+			size:int
+
+	Address
+		particleContent:sequence
+			house_number:int
+			street:string
+			city:string
+			country:string
+			phone:string
+
+	House
+		particleContent:sequence
+			room:Room[1..*]
+			floors:int
+			address:Address
+
+	House_Builder
+		particleContent:sequence
+			address:Address
+			built_houses:House[0..*]
+_____________________________
+_____________________________
+
+2.XSD
+_____________________________
+A new restricted simple root type should be added:
+	Country_Enum
+		enum|RU
+		enum|US
+		enum|UK
+		enum|CH
+		length|2
+New particleContent for Address:
+    particleContent:choice
+        particleContent:sequence
+            house_number:int
+            street:string
+            city:string
+            country:string
+            phone:string
+        particleContent:sequence
+            house_number:int
+            street:string
+            city:string
+            country:Country_Enum
+            phone:string
+
+Affect chain: Address->House->House_Builder;
+                Country_Enum;
+         -----------------
+    Room
+		particleContent:sequence
+		    particleContent:choice
+			    type:string
+			    typeIndex:int
+			size:int
+
+	Address
+	    particleContent:choice
+            particleContent:sequence
+                house_number:int
+                street:string
+                city:string
+                country:string
+                phone:string
+            particleContent:sequence
+                house_number:int
+                street:string
+                city:string
+                country:Country_Enum
+                phone:string
+
+	House
+		particleContent:sequence
+			room:Room[1..*]
+			floors:int
+			address:Address
+
+	House_Builder
+		particleContent:sequence
+			address:Address
+			built_houses:House[0..*]
+_____________________________
+_____________________________
+
+3.XSD
+_____________________________
+Country_Enum simple type should be removed;
+New particleContent for Address:
+    particleContent:choice
+        particleContent:sequence
+            apart_addr:string
+            country:string
+            phone:string
+        particleContent:sequence
+            house_number:int
+            street:string
+            city:string
+            country:string
+            phone:string
+
+Affect chain: Address->House->House_Builder;
+                Country_Enum;
+         -----------------
+    Room
+		particleContent:sequence
+		    particleContent:choice
+			    type:string
+			    typeIndex:int
+			size:int
+
+	Address
+	    particleContent:choice
+            particleContent:sequence
+                apart_addr:string
+                country:string
+                phone:string
+            particleContent:sequence
+                house_number:int
+                street:string
+                city:string
+                country:string
+                phone:string
+
+	House
+		particleContent:sequence
+			room:Room[1..*]
+			floors:int
+			address:Address
+
+	House_Builder
+		particleContent:sequence
+			address:Address
+			built_houses:House[0..*]
+_____________________________
+_____________________________

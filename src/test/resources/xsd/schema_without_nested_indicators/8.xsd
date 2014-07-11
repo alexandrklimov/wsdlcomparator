@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema targetNamespace="http://aklimov.ru/wsdlcomparator" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:wcmp="http://aklimov.ru/wsdlcomparator">
+
+    <xs:complexType name="Room">
+        <xs:attribute name="type" type="xs:string"/>
+        <xs:attribute name="size" type="xs:int"/>
+    </xs:complexType>
+
+    <xs:complexType name="Address">
+        <xs:sequence>
+            <xs:element name="house_number" type="xs:int"/>
+            <xs:element name="street" type="xs:string"/>
+            <xs:element name="city">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="RU"/>
+                        <xs:enumeration value="US"/>
+                        <xs:enumeration value="UK"/>
+                        <xs:enumeration value="CH"/>
+                        <xs:length value="2"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="country" type="xs:string"/>
+            <xs:element name="phone" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="House">
+        <xs:sequence>
+            <xs:element name="room" type="wcmp:Room" minOccurs="1" maxOccurs="unbounded"/>
+            <xs:element name="floors" type="xs:int"/>
+            <xs:element name="address" type="wcmp:Address"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="House_Builder">
+        <xs:sequence>
+            <xs:element name="address" type="wcmp:Address"/>
+            <xs:element name="built_houses" type="wcmp:House" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>

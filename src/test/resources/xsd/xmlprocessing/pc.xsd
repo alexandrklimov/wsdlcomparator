@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:pc="http://aklimov.ru/my/ws/wsdlcabinet"
+	   targetNamespace="http://aklimov.ru/my/ws/wsdlcabinet"
+	   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	   elementFormDefault="qualified">
+
+	<xsd:element name="getURLRequest">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="login" type="xsd:string" minOccurs="1" maxOccurs="1" />
+                <xsd:element name="cuid" type="xsd:long" minOccurs="1" maxOccurs="1" />
+                <xsd:element name="access" type="xsd:string" minOccurs="1" maxOccurs="1" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="getURLResponse">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="url" type="xsd:string" minOccurs="1" maxOccurs="1" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+    <xsd:complexType name="SimpleContentExtensionComplexType">
+        <xsd:simpleContent>
+            <xsd:extension base="xsd:string">
+                <xsd:attribute name="country" type="xsd:string" />
+            </xsd:extension>
+        </xsd:simpleContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="SimpleContentRestrictionComplexType">
+        <xsd:simpleContent>
+            <xsd:restriction base="xsd:string">
+                <xsd:enumeration value="VAL1"/>
+                <xsd:enumeration value="VAL2"/>
+            </xsd:restriction>
+        </xsd:simpleContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="BaseComplexType">
+        <xsd:sequence>
+            <xsd:element name="baseElement1" type="xsd:int"/>
+            <xsd:element name="baseElement2" type="xsd:int"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="ComplexContentExtensionComplexType">
+        <xsd:complexContent>
+            <xsd:extension base="pc:BaseComplexType">
+                <xsd:sequence>
+                    <xsd:element name="element" type="xsd:string"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="ComplexContentRestrictionComplexType">
+        <xsd:complexContent>
+            <xsd:restriction base="pc:BaseComplexType">
+                <xsd:sequence>
+                    <xsd:element name="baseElement1" type="xsd:int"/>
+                </xsd:sequence>
+            </xsd:restriction>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+</xsd:schema>

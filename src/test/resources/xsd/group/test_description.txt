@@ -1,0 +1,19 @@
+    ////////////////////////
+            group
+    ////////////////////////
+
+This test just imports a simple xsd-file and checks correctness built descriptors.
+
+    ////////////////////////
+        group_change1
+    ////////////////////////
+
+A schema contains a group and two types: baseType and derivedType.
+baseType root indicator is defined by a reference to the group.
+
+Make some changes in a group.
+Affects:
+ + baseType
+    - contains ChangeInfoDetails with CHANGE_BY_REF_GRP value about root group reference
+ + derivedType
+    - affectedByBaseChanges property of a TypeDiffInfo is TRUE

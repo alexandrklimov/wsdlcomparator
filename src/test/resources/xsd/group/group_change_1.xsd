@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema targetNamespace="http://aklimov.ru/wsdlcomparator" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:wcmp="http://aklimov.ru/wsdlcomparator">
+
+    <xs:group name="group1">
+        <xs:sequence>
+            <xs:element name="groupElem1" type="xs:int"/>
+            <xs:element name="groupElem3" type="xs:int"/>
+        </xs:sequence>
+    </xs:group>
+
+    <xs:complexType name="baseType">
+        <xs:group ref="wcmp:group1"/>
+    </xs:complexType>
+
+    <xs:complexType name="derivedType">
+        <xs:complexContent>
+            <xs:extension base="wcmp:baseType">
+                <xs:sequence>
+                    <xs:element name="t2Elem1" type="xs:string"/>
+                    <xs:element name="t2Elem2" type="xs:long"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+
+
+</xs:schema>

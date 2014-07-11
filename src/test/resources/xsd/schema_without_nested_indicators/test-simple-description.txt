@@ -1,0 +1,398 @@
+House-\
+	|
+	|_room
+	|
+	|_floors
+	|
+	|_address
+
+House_Builder-\
+	|
+	|_address
+	|
+	|_built_houses
+
+Address-\
+	|
+	|_house_number
+	|_street
+	|_city
+	|_country
+	|_phone
+	
+Room-\
+	|
+	|_type
+	|
+	|_size
+	
+	
+generic.xsd - generic XSD
+_____________________________
+	Room
+		attributes
+			type:string
+			size:int
+	
+	Address
+		particleContent:sequence
+			house_number:int
+			street:string
+			city:string
+			country:string
+			phone:string
+	
+	House 
+		particleContent:sequence
+			room:Room[1..*]
+			floors:int
+			address:Address
+			
+	House_Builder
+		particleContent:sequence
+			address:Address
+			built_houses:House[0..*]
+_____________________________						
+_____________________________						
+
+XSD2 - check structure change detecting
+_____________________________
+Room:attr:type - del
+Room:elem:type - add
+	Affect chain: Room->House->House_Builder
+        -----------------
+	Room
+		attributes
+			size:int
+		particleContent:sequence
+			type:string
+	
+	Address
+		particleContent:sequence
+			house_number:int
+			street:string
+			city:string
+			country:string
+			phone:string
+	
+	House 
+		particleContent:sequence
+			room:Room[1..*]
+			floors:int
+			address:Address
+			
+	House_Builder
+		particleContent:sequence
+			address:Address
+			built_houses:House[0..*]
+_____________________________
+_____________________________
+
+XSD3 - check structure change detecting
+_____________________________
+Address:elem:city - del
+Address:attr:city - add
+	Affect chain: Address->House; Address->House_Builder
+        -----------------
+	Room
+		attributes
+			type:string
+			size:int
+	
+	Address
+		attributes
+			city:string
+		particleContent:sequence
+			house_number:int
+			street:string
+			country:string
+			phone:string
+	
+	House 
+		particleContent:sequence
+			room:Room[1..*]
+			floors:int
+			address:Address
+			
+	House_Builder
+		particleContent:sequence
+			address:Address
+			built_houses:House[0..*]
+_____________________________
+_____________________________
+
+XSD4 - check structure change detecting
+_____________________________
+House_Builder:elems:address:Address - del
+House_Builder:attr:address:string - add
+	Affect chain: House_Builder
+        -----------------
+	Room
+		attributes
+			type:string
+			size:int
+	
+	Address
+		particleContent:sequence
+			house_number:int
+			street:string
+			city:string
+			country:string
+			phone:string
+	
+	House 
+		particleContent:sequence
+			room:Room[1..*]
+			floors:int
+			address:Address
+			
+	House_Builder
+		attributes
+			address:string
+		particleContent:sequence
+			built_houses:House[0..*]
+_____________________________
+_____________________________
+
+XSD5.xsd - check structure change detecting
+_____________________________
+Address:particleContent - change from [sequence] to [all]
+	Affect chain: Address->House->House_Builder
+        -----------------
+	Room
+		attributes
+			type:string
+			size:int
+	
+	Address
+		particleContent:all
+			house_number:int
+			street:string
+			city:string
+			country:string
+			phone:string
+	
+	House 
+		particleContent:sequence
+			room:Room[1..*]
+			floors:int
+			address:Address
+			
+	House_Builder
+		particleContent:sequence
+			address:Address
+			built_houses:House[0..*]
+_____________________________						
+_____________________________
+
+XSD6 - check elem/attr properties change detecting
+_____________________________
+House:particleContent:floors - set cardinality to [1..*]
+	Affect chain: House->House_Builder
+        -----------------
+	Room
+		attributes
+			type:string
+			size:int
+	
+	Address
+		particleContent:sequence
+			house_number:int
+			street:string
+			city:string
+			country:string
+			phone:string
+	
+	House 
+		particleContent:sequence
+			room:Room[1..*]
+			floors:int[1..*]
+			address:Address
+			
+	House_Builder
+		particleContent:sequence
+			address:Address
+			built_houses:House[0..*]
+_____________________________						
+_____________________________
+
+XSD7 - check elem/attr properties change && check structure change detecting
+_____________________________
+A new restricted simple type should be added:
+	Country_Enum
+		enum|RU
+		enum|US
+		enum|UK
+		enum|CH
+		length|2
+Address:city - change the type from [string] to Country_Enum
+	Affect chain: Country_Enum; Address->House; Address->House_Builder; House->House_Builder;
+        -----------------
+	Room
+		attributes
+			type:string
+			size:int
+	
+	Address
+		particleContent:sequence
+			house_number:int
+			street:string
+			city:string
+			country:Country_Enum
+			phone:string
+	
+	House 
+		particleContent:sequence
+			room:Room[1..*]
+			floors:int
+			address:Address
+			
+	House_Builder
+		particleContent:sequence
+			address:Address
+			built_houses:House[0..*]
+_____________________________						
+_____________________________
+
+XSD8 - check elem/attr properties change  && check structure change detecting
+_____________________________
+Address:city - change the type from [string] to a new anonymous type has 
+the same structure as Country_Enum type from XSD6
+	Affect chain: Country_Enum_as_anonym._type; 
+				Country_Enum_as_anonym._type->Address; 
+				Address->House;
+				House->House_Builder;
+				Address->House_Builder
+        -----------------
+	Room
+		attributes
+			type:string
+			size:int
+	
+	Address
+		particleContent:sequence
+			house_number:int
+			street:string
+			city:string
+			country:string
+			phone:string
+	
+	House 
+		particleContent:sequence
+			room:Room[1..*]
+			floors:int
+			address:Address
+			
+	House_Builder
+		particleContent:sequence
+			address:Address
+			built_houses:House[0..*]
+_____________________________						
+_____________________________							
+
+XSD9 - check elem/attr properties change  && check structure change detecting
+_____________________________
+Address - del
+House:address - change type from [Address] to [string]
+House_Builder - change type from [Address] to [string]
+	Affect chain: Address; House; House->House_Builder
+        -----------------
+	Room
+		attributes
+			type:string
+			size:int
+	
+	Address
+		particleContent:sequence
+			house_number:int
+			street:string
+			city:string
+			country:string
+			phone:string
+	
+	House 
+		particleContent:sequence
+			room:Room[1..*]
+			floors:int
+			address:Address
+			
+	House_Builder
+		particleContent:sequence
+			address:Address
+			built_houses:House[0..*]
+_____________________________						
+_____________________________
+
+XSD10.xsd - check elem/attr properties change
+_____________________________
+Room:size - set defaultValue = 10
+Address:city - set defaultValue = "RU"
+	Affect chain: Room; Address; 
+				Room->House->House_Builder; 
+				Address->House->House_Builder; 
+				Address->House_Builder
+        -----------------
+	Room
+		attributes
+			type:string
+			size:int
+	
+	Address
+		particleContent:sequence
+			house_number:int
+			street:string
+			city:string
+			country:string
+			phone:string
+	
+	House 
+		particleContent:sequence
+			room:Room[1..*]
+			floors:int
+			address:Address
+			
+	House_Builder
+		particleContent:sequence
+			address:Address
+			built_houses:House[0..*]
+_____________________________						
+_____________________________
+
+composite.xsd - composite XSD
+It's for test of load a root particleContent anonymous type
+_____________________________
+	Affect chain: a new anonymous type with Some_Element element as owner element
+        -----------------
+	Room
+		attributes
+			type:string
+			size:int
+	
+	Address
+		particleContent:sequence
+			house_number:int
+			street:string
+			city:string
+			country:string
+			phone:string
+	
+	House 
+		particleContent:sequence
+			room:Room[1..*]
+			floors:int
+			address:Address
+			
+	House_Builder
+		particleContent:sequence
+			address:Address
+			built_houses:House[0..*]
+			
+	Some_Elements:element
+		complexType
+			particleContent
+				room:Room
+				address:Address
+				house:House
+				house_builde:House_Builder
+_____________________________						
+_____________________________

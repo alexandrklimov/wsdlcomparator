@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:tns="http://aklimov.ru/wsdlcomparator"
+                  targetNamespace="http://aklimov.ru/wsdlcomparator">
+    <wsdl:types>
+        <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                    xmlns:wcmp="http://aklimov.ru/wsdlcomparator" attributeFormDefault="unqualified"
+                    elementFormDefault="qualified" targetNamespace="http://aklimov.ru/wsdlcomparator">
+            <xsd:element name="getURLRequest">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="login" type="xsd:string"/>
+                        <xsd:element name="cuid" type="xsd:long"/>
+                        <xsd:element name="access" type="xsd:string"/>
+                        <xsd:sequence>
+                            <xsd:element name="choice1" type="xsd:string"/>
+                            <xsd:element name="choice2" type="xsd:string"/>
+                        </xsd:sequence>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="getURLResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <!--<xsd:element name="url" type="xsd:string"/>-->
+                        <xsd:element name="ololo" type="wcmp:testGroupCT"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:complexType name="testGroupCT">
+                <xsd:group ref="wcmp:testGroup"/>
+            </xsd:complexType>
+
+            <xsd:group name="testGroup">
+                <xsd:sequence>
+                    <xsd:element name="testGroupElem" type="xsd:float"/>
+                </xsd:sequence>
+            </xsd:group>
+
+        </xsd:schema>
+
+    </wsdl:types>
+    <wsdl:message name="getURLResponse">
+        <wsdl:part element="tns:getURLResponse" name="getURLResponse">
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="getURLRequest">
+        <wsdl:part element="tns:getURLRequest" name="getURLRequest">
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:portType name="PCUrlWSPort">
+        <wsdl:operation name="getURL">
+            <wsdl:input message="tns:getURLRequest" name="getURLRequest">
+            </wsdl:input>
+            <wsdl:output message="tns:getURLResponse" name="getURLResponse">
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="PCUrlWSPortSoap11" type="tns:PCUrlWSPort">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="getURL">
+            <soap:operation soapAction=""/>
+            <wsdl:input name="getURLRequest">
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="getURLResponse">
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="PCUrlWSPortService">
+        <wsdl:port binding="tns:PCUrlWSPortSoap11" name="PCUrlWSPortSoap11">
+            <soap:address
+                    location=""/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>

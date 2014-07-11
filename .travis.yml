@@ -1,0 +1,23 @@
+language: java
+jdk:
+  - oraclejdk7
+
+branches:
+  except:
+    - /^fix-.*$/
+    - /^fix_.*$/
+    - /^dev_.*$/
+    - /^dev_.*$/
+  
+before_script: mvn install
+script: mvn deploy -P deploy.sonatype -DskipTests=true -X -s ./settings.xml
+
+env:
+  global:
+    - secure: "bxG6jTZEoi0SkJQOpRn59XVVuYtMc/mc5UE4GN0jmk5lveKRQr73xiL1ugZKtmhAQa3zk+SEO7SqweaZa/cd3uFTbfHDW3hNReO21mAbBSVhYaR1mnhKUG/gOD3hfpvlbtmtiL/9T0inWXFVuyQyNxGsA99+PCh1QCm3mma7bf0="
+    - secure: "ZH7VxPU2jPJEL7Hic3mrO9sY9fnI3YY8y4rBaJa+l4GKgOa6sdwlLGX2tPa6tGA2eI5Zwy+9wb9dqWRji/zURwnknZlGx9Ml2ZXFZtTnDeQWEuqzUB3KqUpn/Ed1jaWj1uiHfJNwqiHIrW7j9cwcpoqUAma2v/JrxZyJ4SZP9UA="
+  
+notifications:
+  email:
+    recepients:
+      - my-ava@yandex.ru
