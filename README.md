@@ -1,4 +1,4 @@
-## What is WSDLCOMPARATOR?
+## What is WSDLCOMPARATOR? 
 
 WSDLCOMPARATOR is a java library intended for computing difference between two WSDL 1.1 or XSD files.
 
