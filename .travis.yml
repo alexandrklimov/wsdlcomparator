@@ -14,8 +14,8 @@ script: mvn deploy -P deploy.sonatype -DskipTests=true -X -s ./settings.xml
 
 env:
   global:
-    - secure: "bxG6jTZEoi0SkJQOpRn59XVVuYtMc/mc5UE4GN0jmk5lveKRQr73xiL1ugZKtmhAQa3zk+SEO7SqweaZa/cd3uFTbfHDW3hNReO21mAbBSVhYaR1mnhKUG/gOD3hfpvlbtmtiL/9T0inWXFVuyQyNxGsA99+PCh1QCm3mma7bf0="
-    - secure: "ZH7VxPU2jPJEL7Hic3mrO9sY9fnI3YY8y4rBaJa+l4GKgOa6sdwlLGX2tPa6tGA2eI5Zwy+9wb9dqWRji/zURwnknZlGx9Ml2ZXFZtTnDeQWEuqzUB3KqUpn/Ed1jaWj1uiHfJNwqiHIrW7j9cwcpoqUAma2v/JrxZyJ4SZP9UA="
+    - secure: "f3Z/PHMNSPtaKb788/wtQiBe2y0z669UkWamsmQP12CDR/spUuDacBu1Cm9VqWr64uY24o0ckZ0dlE9sBegosV7dHvOFSkVDEPGnmeWfxIBSxF1r/wJ4RNH1XQAN18L1W8hM6J8y5LnlgriiRLEhHOzy3HvAQklduydvaILTa24="
+    - secure: "IT91a9fdEVxj2G1CoCkeRqblTRK1PaTBkOiTSwmoj2JXd2J41h/Ta6FJdWU2Xs3D06Uf0pv6fqvWMjNxO2JaeirqA8+c5K2Md4HlbZ9hhH6jTbwmLuJEctnyLQfn8SRfAkCuMOsHbWy5lZHK3aIUD2WjiHsevMkZT7fcNMH9w7I="
   
 notifications:
   email:
