@@ -14,8 +14,9 @@ public class WSMethodDescrTable{
 
     @Override
     public int hashCode(){
+        String requestParamsStr = (requestParams==null)?"":requestParams.toString();
         String responseParamsStr = (responseParams==null)?"":responseParams.toString();
-        return ( ""+methodName+changeType+requestParams.toString()+responseParamsStr ).hashCode();
+        return ( ""+methodName+changeType+requestParamsStr+responseParamsStr ).hashCode();
     }
 
     @Override
