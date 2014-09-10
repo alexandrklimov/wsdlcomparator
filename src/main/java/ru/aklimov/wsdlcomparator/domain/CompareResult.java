@@ -2,7 +2,7 @@ package ru.aklimov.wsdlcomparator.domain;
 
 import ru.aklimov.wsdlcomparator.domain.diff.impl.GroupDiffInfo;
 import ru.aklimov.wsdlcomparator.domain.diff.impl.TypeDiffInfo;
-import ru.aklimov.wsdlcomparator.domain.diff.impl.DiffWSMethodInfo;
+import ru.aklimov.wsdlcomparator.domain.diff.impl.WSMethodDiffInfo;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -17,12 +17,12 @@ import java.util.Set;
 public class CompareResult {
     Set<TypeDiffInfo> typesDiff;
     Set<GroupDiffInfo> groupsDiff;
-    Set<DiffWSMethodInfo> wsMethodDiff;
+    Set<WSMethodDiffInfo> wsMethodDiff;
 
     public CompareResult() {
     }
 
-    public CompareResult(Set<TypeDiffInfo> typesDiff, Set<GroupDiffInfo> groupsDiff, Set<DiffWSMethodInfo> wsMethodDiff) {
+    public CompareResult(Set<TypeDiffInfo> typesDiff, Set<GroupDiffInfo> groupsDiff, Set<WSMethodDiffInfo> wsMethodDiff) {
         this.typesDiff = typesDiff;
         this.groupsDiff = groupsDiff;
         this.wsMethodDiff = wsMethodDiff;
@@ -39,14 +39,14 @@ public class CompareResult {
         this.typesDiff = typesDiff;
     }
 
-    public Set<DiffWSMethodInfo> getWsMethodDiff() {
+    public Set<WSMethodDiffInfo> getWsMethodDiff() {
         if(wsMethodDiff == null){
             wsMethodDiff = new HashSet<>();
         }
         return wsMethodDiff;
     }
 
-    public void setWsMethodDiff(Set<DiffWSMethodInfo> wsMethodDiff) {
+    public void setWsMethodDiff(Set<WSMethodDiffInfo> wsMethodDiff) {
         this.wsMethodDiff = wsMethodDiff;
     }
 

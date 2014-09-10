@@ -1,25 +1,23 @@
 package ru.aklimov.wsdlcomparator.domain.descriptors;
 
+import javax.xml.namespace.QName;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+
 /**
- * Created with IntelliJ IDEA.
- * User: aklimov
- * Date: 04.07.13
- * Time: 15:39
- * To change this template use File | Settings | File Templates.
+*@author Alexandr Klimov
  */
 public class WSMethodDescr {
     private String methodName;
-    /**This field may be null if a method does not take any arguments*/
-    private TypeDescriptor requestType;
-    private String requestNamespace;
-    /**This field may be null if a response type is void*/
-    private TypeDescriptor responseType;
-    private String responseNamespace;
+    private List<WSMethodDescr.MessagePartDescr> inputMessage = new LinkedList<>();
+    private List<WSMethodDescr.MessagePartDescr> outputMessage = new LinkedList<>();
+    private QName portTypeName;
+
 
     @Override
-    public int hashCode(){
-        String responseParamsStr = (responseType ==null)?"": responseType.toString();
-        return ( ""+methodName+responseNamespace+requestNamespace+ requestType.toString()+responseParamsStr ).hashCode();
+    public int hashCode() {
+        return Objects.hash(methodName, portTypeName);
     }
 
     @Override
@@ -31,11 +29,10 @@ public class WSMethodDescr {
         boolean res = false;
         //todo: make more clean
         if(wsMethodDescrObj instanceof WSMethodDescr){
-            WSMethodDescr wsMethodDescr = (WSMethodDescr) wsMethodDescrObj;
-            boolean methodNameEq = (methodName==null && methodName==wsMethodDescr.methodName) || ( (methodName!=null && wsMethodDescr.methodName!=null) && (methodName.equals(wsMethodDescr.methodName)) );
-            boolean requestMethodNamespaceEq = (requestNamespace==null && requestNamespace==wsMethodDescr.requestNamespace) || (  (requestNamespace!=null && wsMethodDescr.requestNamespace!=null) && (requestNamespace.equals(wsMethodDescr.requestNamespace)) );
-            boolean responseMethodNamespaceEq = (responseNamespace==null && responseNamespace==wsMethodDescr.responseNamespace) || ( (responseNamespace!=null && wsMethodDescr.responseNamespace!=null) && (responseNamespace.equals(wsMethodDescr.responseNamespace)) );
-            res = methodNameEq && requestMethodNamespaceEq && responseMethodNamespaceEq;
+            WSMethodDescr other = (WSMethodDescr) wsMethodDescrObj;
+            boolean methodNameEq = (methodName==null && methodName==other.methodName) || ( (methodName!=null && other.methodName!=null) && (methodName.equals(other.methodName)) );
+            boolean portTypeEq = (portTypeName==null && portTypeName==other.portTypeName) || ( (portTypeName!=null && other.portTypeName!=null) && (portTypeName.equals(other.portTypeName)) );
+            res = methodNameEq && portTypeEq;
         }
         return res;
     }
@@ -43,23 +40,10 @@ public class WSMethodDescr {
     @Override
     public String toString(){
         StringBuilder sb = new StringBuilder();
+        sb.append("\n\tPORT TYPE NAME "+portTypeName);
         sb.append("\n\tWS METHOD "+methodName);
-
-        if(requestType ==null){
-            sb.append("\n\trequestType: "+ requestType.getName());
-        }else {
-            sb.append("\n\trequestType: "+ requestType);
-        }
-
-        sb.append("\n\trequestNamespace: "+requestNamespace);
-
-        if(responseType ==null){
-            sb.append("\n\tresponseType: "+ responseType);
-        } else {
-            sb.append("\n\tresponseType: "+ responseType.getName());
-        }
-
-        sb.append("\n\tresponseNamespace: "+responseNamespace);
+        sb.append("\n\tinputMessage: " + inputMessage.toString());
+        sb.append("\n\toutputMessage: " + outputMessage.toString());
         sb.append("\n");
         return sb.toString();
     }
@@ -74,36 +58,95 @@ public class WSMethodDescr {
         this.methodName = methodName;
     }
 
-    public String getRequestNamespace() {
-        return requestNamespace;
+    public List<WSMethodDescr.MessagePartDescr> getInputMessage() {
+        if(inputMessage == null){
+            inputMessage = new LinkedList<>();
+        }
+        return inputMessage;
     }
 
-    public void setRequestNamespace(String requestNamespace) {
-        this.requestNamespace = requestNamespace;
+    public List<WSMethodDescr.MessagePartDescr> getOutputMessage() {
+        if(outputMessage == null){
+            outputMessage = new LinkedList<>();
+        }
+        return outputMessage;
     }
 
-    public String getResponseNamespace() {
-        return responseNamespace;
+    public QName getPortTypeName() {
+        return portTypeName;
     }
 
-    public void setResponseNamespace(String responseNamespace) {
-        this.responseNamespace = responseNamespace;
+    public void setPortTypeName(QName portTypeName) {
+        this.portTypeName = portTypeName;
     }
 
-    public TypeDescriptor getRequestType() {
-        return requestType;
-    }
 
-    public void setRequestType(TypeDescriptor requestType) {
-        this.requestType = requestType;
-    }
 
-    public TypeDescriptor getResponseType() {
-        return responseType;
-    }
+    ///////////////// NESTED CLASS ///////////////////////////////////
 
-    public void setResponseType(TypeDescriptor responseType) {
-        this.responseType = responseType;
-    }
+    public static class MessagePartDescr{
+        private String name;
+        private boolean byElementBinding;
+        private QName elemQName;
+        private TypeDescriptor typeDescr;
 
+        public MessagePartDescr(String name, boolean byElementBinding, QName elemQName, TypeDescriptor typeDescr) {
+            this.name = name;
+            this.byElementBinding = byElementBinding;
+            this.elemQName = elemQName;
+            this.typeDescr = typeDescr;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("\n\tWS MESSAGE PART "+name);
+            sb.append("\n\tby element binding: "+ byElementBinding);
+            sb.append("\n\t\telement QName: "+elemQName);
+            sb.append("\n\ttype descriptor: "+typeDescr);
+            sb.append("\n");
+            return sb.toString();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            MessagePartDescr that = (MessagePartDescr) o;
+
+            if (byElementBinding != that.byElementBinding) return false;
+            if (elemQName != null ? !elemQName.equals(that.elemQName) : that.elemQName != null) return false;
+            if (!name.equals(that.name)) return false;
+            if (!typeDescr.equals(that.typeDescr)) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = name.hashCode();
+            result = 31 * result + (byElementBinding ? 1 : 0);
+            result = 31 * result + (elemQName != null ? elemQName.hashCode() : 0);
+            result = 31 * result + typeDescr.hashCode();
+            return result;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public boolean isByElementBinding() {
+            return byElementBinding;
+        }
+
+        public QName getElemQName() {
+            return elemQName;
+        }
+
+        public TypeDescriptor getTypeDescr() {
+            return typeDescr;
+        }
+
+    }
 }

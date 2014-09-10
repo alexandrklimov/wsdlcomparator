@@ -1,4 +1,4 @@
-package ru.aklimov.wsdlcomparator;
+package ru.aklimov.wsdlcomparator.modelbuilders;
 
 import static ru.aklimov.wsdlcomparator.domain.tblmodel.TypeDescrTable.*;
 
@@ -9,19 +9,23 @@ import static ru.aklimov.wsdlcomparator.domain.diff.ChangeInfoDetails.ELEM_OR_AT
 
 import ru.aklimov.wsdlcomparator.domain.diff.impl.GroupDiffInfo;
 import ru.aklimov.wsdlcomparator.domain.diff.impl.TypeDiffInfo;
-import ru.aklimov.wsdlcomparator.domain.diff.impl.DiffWSMethodInfo;
+import ru.aklimov.wsdlcomparator.domain.diff.impl.WSMethodDiffInfo;
 
 import org.apache.commons.collections.ListUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.ws.commons.schema.*;
 import ru.aklimov.wsdlcomparator.domain.tblmodel.*;
+import ru.aklimov.wsdlcomparator.domain.tblmodel.method.MessagePartDescrTable;
+import ru.aklimov.wsdlcomparator.domain.tblmodel.method.WSMethodDescrTable;
 
 import javax.xml.namespace.QName;
 import java.util.*;
 
 /**
  * @author Alexandr Klimov
+ *
+ * TODO: split this class
  */
 public class ViewModelCreator {
     public static final String GROUP_TABLE_ID_PREFIX = "group_table|";
@@ -127,7 +131,7 @@ public class ViewModelCreator {
      * @return
      */
     @SuppressWarnings("unchecked")
-    public Set<WSMethodDescrTable> createWSMethodModelByDiffInfo(Set<DiffWSMethodInfo> wsMethodsDiffs,
+    public Set<WSMethodDescrTable> createWSMethodModelByDiffInfo(Set<WSMethodDiffInfo> wsMethodsDiffs,
                                                                  final Set<TypeDescrTable> typeTbls,
                                                                  final Set<GroupDescrTable> groupTbls,
                                                                  final boolean includeRefGroup,
@@ -135,68 +139,38 @@ public class ViewModelCreator {
                                                                  final int deepCount){
         Set<WSMethodDescrTable> resSet = new HashSet<>();
 
-        for(DiffWSMethodInfo diffWSMethod : wsMethodsDiffs){
-            WSMethodDescrTable tmpWsMethTbl = new WSMethodDescrTable();
+        for(WSMethodDiffInfo diffWSMethod : wsMethodsDiffs){
             WSMethodDescr method = diffWSMethod.getWsMethodDescr();
+
+            WSMethodDescrTable tmpWsMethTbl = new WSMethodDescrTable();
             tmpWsMethTbl.setMethodName( method.getMethodName() );
             tmpWsMethTbl.setChangeType( diffWSMethod.getChangeType().toString() );
 
-            TypeDescriptor requestParamsTd = method.getRequestType();
-            if(requestParamsTd!=null){
-                TypeDescrTable processedTbl = findTypeDescrTable(buildTypeDescrTableId(requestParamsTd), typeTbls);
-                if( processedTbl!=null ){
-                    tmpWsMethTbl.setRequestParams( processedTbl );
+            //A single context will be used for message parts processing.
+            //It's possible because the context acts as arguments and processing results container irrelative of
+            //any concrete processed message part or a type of a processed part.
+            ModelBuildCntx cntx = new ModelBuildCntx(null, null, null, null, typeTbls, groupTbls, mergeWithBaseType, includeRefGroup, deepCount, true);
 
-                } else {
-                    Set<TypeDescrTable> newTbls = new HashSet<>();
-                    Set<TypeDescrTable> processedTableSnapshot = new HashSet<>();
-                    //Remember processed types at the moment for detecting new types in the future
-                    processedTableSnapshot.addAll(typeTbls);
-                    //processing
-                    ModelBuildCntx cntx = new ModelBuildCntx(requestParamsTd, null, null, null, typeTbls, groupTbls, mergeWithBaseType, includeRefGroup, deepCount, true);
-                    createModelByTd(cntx);
-                    //detect new types
-                    newTbls.addAll( ListUtils.removeAll(new LinkedList(typeTbls), new LinkedList(processedTableSnapshot)) );
-                    tmpWsMethTbl.setRequestParams(findTypeDescrTable(buildTypeDescrTableId(requestParamsTd), newTbls));
-
-                }
+            List<WSMethodDescr.MessagePartDescr> inputMessage = method.getInputMessage();
+            if( ! inputMessage.isEmpty()){
+                List<MessagePartDescrTable> messagePartDescrTableLst = createMsgPartTables(diffWSMethod, inputMessage, cntx);
+                tmpWsMethTbl.setInputMessage(messagePartDescrTableLst);
 
             }
 
-            TypeDescriptor responseParamsTd = method.getResponseType();
-            if(responseParamsTd!=null){
-                TypeDescrTable processedTbl = findTypeDescrTable(buildTypeDescrTableId(responseParamsTd), typeTbls);
-                if( processedTbl!=null ){
-                    tmpWsMethTbl.setResponseParams(processedTbl);
+            List<WSMethodDescr.MessagePartDescr> outputMessage = method.getOutputMessage();
+            if( ! outputMessage.isEmpty()){
+                List<MessagePartDescrTable> messagePartDescrTableLst = createMsgPartTables(diffWSMethod, outputMessage, cntx);
+                tmpWsMethTbl.setOutputMessage(messagePartDescrTableLst);
 
-                } else {
-                    Set<TypeDescrTable> newTbls = new HashSet<>();
-                    Set<TypeDescrTable> processedTableSnapshot = new HashSet<>();
-                        //Remember processed types at the moment for detecting new types in the future
-                    processedTableSnapshot.addAll(typeTbls);
-                        //processing
-                    ModelBuildCntx cntx = new ModelBuildCntx(responseParamsTd, null, null, null, typeTbls, groupTbls, mergeWithBaseType, includeRefGroup, deepCount, true);
-                    createModelByTd(cntx);
-                        //detect new types and add only them
-                    newTbls.addAll( ListUtils.removeAll(new LinkedList(typeTbls), new LinkedList(processedTableSnapshot)) );
-                    tmpWsMethTbl.setResponseParams( findTypeDescrTable(buildTypeDescrTableId(responseParamsTd), newTbls) );
-
-                }
             } else {
-                if( DiffWSMethodInfo.WSMETHOD_CHANGE_TYPE.RESPONSE_DEL.equals(diffWSMethod.getChangeType()) ){
-                    TypeDescriptor deletedResponseTd = diffWSMethod.getDeletedReponseType();
-                    Set<TypeDescrTable> newTbls = new HashSet<>();
-                    Set<TypeDescrTable> processedTableSnapshot = new HashSet<>();
-                    //Remember processed types at the moment for detecting new types in the future
-                    processedTableSnapshot.addAll(typeTbls);
-                    //processing
-                    ModelBuildCntx cntx = new ModelBuildCntx(responseParamsTd, null, null, null, typeTbls, groupTbls, mergeWithBaseType, includeRefGroup, deepCount, true);
-                    createModelByTd(cntx);
-                    //detect new types and add only them
-                    newTbls.addAll( ListUtils.removeAll(new LinkedList(typeTbls), new LinkedList(processedTableSnapshot)) );
-                    tmpWsMethTbl.setDeletedResponseTable(
-                                    findTypeDescrTable(
-                                            buildTypeDescrTableId(deletedResponseTd), newTbls));
+                if( WSMethodDiffInfo.WSMETHOD_CHANGE_TYPE.RESPONSE_DEL.equals(diffWSMethod.getChangeType()) ){
+                    //Build tables for all parts of a deleted message
+                    List<MessagePartDescrTable> deletedMsgPartTables = new LinkedList<>();
+                    for(WSMethodDescr.MessagePartDescr deletedPartDescr : diffWSMethod.getDeletedOutputMessage()){
+                        deletedMsgPartTables.add( MessagePartDescrTableBuilder.createTableByDescr(deletedPartDescr, cntx) );
+                    }
+                    tmpWsMethTbl.setDeletedOutputMessage(deletedMsgPartTables);
                 }
             }
 
@@ -204,6 +178,25 @@ public class ViewModelCreator {
         }
 
         return resSet;
+    }
+
+
+    private List<MessagePartDescrTable> createMsgPartTables(WSMethodDiffInfo diffWSMethod, List<WSMethodDescr.MessagePartDescr> inputMessage, ModelBuildCntx cntx) {
+        List<MessagePartDescrTable> messagePartDescrTableLst = new LinkedList<>();
+
+        for(WSMethodDescr.MessagePartDescr msgPartDescr : inputMessage){
+            final MessagePartDescrTable table;
+            //Changes for message part is processed may be found
+            if( diffWSMethod.getChangedInMsgParts().containsKey(msgPartDescr) ){
+                table = MessagePartDescrTableBuilder.createTableByDiffInfo(diffWSMethod.getChangedInMsgParts().get(msgPartDescr), cntx);
+            } else {
+                table = MessagePartDescrTableBuilder.createTableByDescr(msgPartDescr, cntx);
+            }
+
+            messagePartDescrTableLst.add(table);
+        }
+
+        return messagePartDescrTableLst;
     }
 
 
@@ -231,52 +224,26 @@ public class ViewModelCreator {
             WSMethodDescrTable tmpWsMethTbl = new WSMethodDescrTable();
             tmpWsMethTbl.setMethodName(methodDescr.getMethodName());
 
-            TypeDescriptor requestParamsTd = methodDescr.getRequestType();
-            if(requestParamsTd!=null){
-                TypeDescrTable processedTbl = findTypeDescrTable( buildTypeDescrTableId(requestParamsTd), typeTbls);
-                if( processedTbl!=null ){
-                    tmpWsMethTbl.setRequestParams( processedTbl );
-
-                } else {
-                    Set<TypeDescrTable> newTbls = new HashSet<>();
-                    Set<TypeDescrTable> processedTableSnapshot = new HashSet<>();
-                    //Remember processed types at the moment for detecting new types in the future
-                    processedTableSnapshot.addAll(typeTbls);
-                    //processing
-                    ModelBuildCntx cntx = new ModelBuildCntx(requestParamsTd, null, null, null, typeTbls, groupTbls, mergeWithBaseType, includeRefGroup, deepCount, true);
-                    createModelByTd(cntx);
-                    //detect new types
-                    newTbls.addAll( ListUtils.removeAll(new LinkedList(typeTbls), new LinkedList(processedTableSnapshot)) );
-                    tmpWsMethTbl.setRequestParams(
-                            findTypeDescrTable(
-                                    buildTypeDescrTableId(requestParamsTd), typeTbls) );
-
+            List<WSMethodDescr.MessagePartDescr> inputMessage = methodDescr.getInputMessage();
+            if( ! inputMessage.isEmpty()){
+                List<MessagePartDescrTable> messagePartDescrTableLst = new LinkedList<>();
+                ModelBuildCntx cntx = new ModelBuildCntx(null, null, null, null, typeTbls, groupTbls, mergeWithBaseType, includeRefGroup, deepCount, true);
+                for(WSMethodDescr.MessagePartDescr msgPartDescr : inputMessage){
+                    MessagePartDescrTable table = MessagePartDescrTableBuilder.createTableByDescr(msgPartDescr, cntx);
+                    messagePartDescrTableLst.add(table);
                 }
 
             }
 
-            TypeDescriptor responseParamsTd = methodDescr.getResponseType();
-            if(responseParamsTd!=null){
-                TypeDescrTable processedTbl = findTypeDescrTable( buildTypeDescrTableId(responseParamsTd), typeTbls);
-                if( processedTbl!=null ){
-                    tmpWsMethTbl.setResponseParams(processedTbl);
-
-                } else {
-                    Set<TypeDescrTable> newTbls = new HashSet<>();
-                    //createModelByTd(responseParams, new HashMap<TypeDescriptor, DiffInfo>(), newTbls, 1);
-                    Set<TypeDescrTable> processedTableSnapshot = new HashSet<>();
-                    //Remember processed types at the moment for detecting new types in the future
-                    processedTableSnapshot.addAll(typeTbls);
-                    //processing
-                    ModelBuildCntx cntx = new ModelBuildCntx(responseParamsTd, null, null, null, typeTbls, groupTbls, mergeWithBaseType, includeRefGroup, deepCount, true);
-                    createModelByTd(cntx);
-                    //detect new types
-                    newTbls.addAll( ListUtils.removeAll(new LinkedList(typeTbls), new LinkedList(processedTableSnapshot)) );
-                    tmpWsMethTbl.setResponseParams(
-                            findTypeDescrTable(
-                                    buildTypeDescrTableId(responseParamsTd), typeTbls) );
-
+            List<WSMethodDescr.MessagePartDescr> outputMessage = methodDescr.getOutputMessage();
+            if( ! outputMessage.isEmpty()){
+                List<MessagePartDescrTable> messagePartDescrTableLst = new LinkedList<>();
+                ModelBuildCntx cntx = new ModelBuildCntx(null, null, null, null, typeTbls, groupTbls, mergeWithBaseType, includeRefGroup, deepCount, true);
+                for(WSMethodDescr.MessagePartDescr msgPartDescr : outputMessage){
+                    MessagePartDescrTable table = MessagePartDescrTableBuilder.createTableByDescr(msgPartDescr, cntx);
+                    messagePartDescrTableLst.add(table);
                 }
+
             }
 
             resSet.add(tmpWsMethTbl);
@@ -342,7 +309,7 @@ public class ViewModelCreator {
      *
      * @param cntx
      */
-    public void createModelByTd(final ModelBuildCntx cntx){
+    public static void createModelByTd(final ModelBuildCntx cntx){
         TypeDescriptor td = cntx.getTd();
 
         if(td == null){
@@ -461,11 +428,11 @@ public class ViewModelCreator {
 
     /**
      * This function creates table model by a TypeDescriptor and GroupDescriptor start from a GroupDescriptor.<br/>
-     * It works by analogy with {@link ru.aklimov.wsdlcomparator.ViewModelCreator#createModelByTd(ru.aklimov.wsdlcomparator.domain.tblmodel.ModelBuildCntx)}.
+     * It works by analogy with {@link ViewModelCreator#createModelByTd(ru.aklimov.wsdlcomparator.domain.tblmodel.ModelBuildCntx)}.
      *
      * @param cntx
      */
-    public void createModelByGd(ModelBuildCntx cntx){
+    public static void createModelByGd(ModelBuildCntx cntx){
         GroupDescriptor gd = cntx.getGd();
 
         if(gd == null){
@@ -513,7 +480,7 @@ public class ViewModelCreator {
      * @param facets
      * @return List<String[]>
      */
-    private List<String[]> getFacetsDescriptions(XmlSchemaFacet[] facets){
+    private static List<String[]> getFacetsDescriptions(XmlSchemaFacet[] facets){
         List<String[]> descr = new LinkedList<>();
         if(facets==null){
             return descr;
@@ -536,7 +503,7 @@ public class ViewModelCreator {
      * @param td
      * @return String
      */
-     private String createTableTitle(TypeDescriptor td){
+     private static String createTableTitle(TypeDescriptor td){
         QName typeQName = td.getQName();
         if(typeQName!=null){
             return typeQName.getLocalPart();
@@ -549,12 +516,12 @@ public class ViewModelCreator {
      * @param gd
      * @return String
      */
-    private String createGroupTitle(GroupDescriptor gd){
+    private static String createGroupTitle(GroupDescriptor gd){
         QName typeQName = gd.getQName();
         return typeQName.getLocalPart();
     }
 
-    private SIMPLE_CONTENT_TYPE getSimpleContentType(TypeDescriptor td){
+    private static SIMPLE_CONTENT_TYPE getSimpleContentType(TypeDescriptor td){
         if(td.isComplexType()){
             throw new IllegalArgumentException("This function can't process complex type!");
         }
@@ -570,7 +537,7 @@ public class ViewModelCreator {
         }
     }
 
-    private COMPLEX_CONTENT_TYPE getComplexContentType(TypeDescriptor td){
+    private static COMPLEX_CONTENT_TYPE getComplexContentType(TypeDescriptor td){
         if(!td.isComplexType()){
             throw new IllegalArgumentException("This function can't process simple type!");
         }
@@ -593,7 +560,7 @@ public class ViewModelCreator {
         return res;
     }
 
-    private INDICATOR_TYPE getRootIndicatorType(TypeDescriptor td){
+    private static INDICATOR_TYPE getRootIndicatorType(TypeDescriptor td){
         if(!td.isComplexType()){
             throw new IllegalArgumentException("This function can't process simple type!");
         }
@@ -619,92 +586,8 @@ public class ViewModelCreator {
         return res;
     }
 
+
     ///////////////// ELEMENTS/ATTRIBUTES PROCESSING FUNCTIONS /////////////////////////////////////////////////
-
-    /**
-     * This function returns
-     * <ul>
-     *     <li>either a row tree represents an root indicator(all, choice, sequence or root ref. to a group) of a processed type</li>
-     *     <li>or rows present the processed type attributes</li>
-     * </ul>
-     * <br/>
-     * If the processed type is complex then it may be extension from some base type.<br/>
-     * In that case we may show a table about the type in two ways:<br/>
-     * <ol>
-     *     <li>as one table, contains all descriptors and nested indicators from in accordance with whole extension tree</li>
-     *     <li>each type will contain own peculiarity items only</li>
-     * </ol>
-     * <strong>In the first case</strong>
-     *  - tables about base types will be created <strong>anyway</strong> during processing <strong>and</strong>
-     * a table about the processed type will be contain all items from all base types.<br/>
-     *  - a counter of deep isn't taken in account in this case.
-     * <br/>
-     * <strong>In the second case</strong> a table about processed type will be contain descriptors and indicators from itself only.<br/>
-     * For each base type, for a whole extension tree of the type, standalone table will be generated.<br/>
-     * <br/>
-     * The <strong>mergeWithBaseType</strong> parameter is responsible for functionality described above.<br/>
-     * <br/>
-     *
-     * @param cntx
-     * @return list of table rows describe either type attributes <strong>(returned list can have more than one item )</strong>
-     *          or type indicators/descriptors <strong>(list has only one element - a root indicator row)</strong>.
-     */
-    /*private List<TableRow> getComplexTypeRows(final ModelBuildCntx cntx){
-        log.debug("Get rows for TypeDescriptor:\n"+ cntx.getTd() +"\n deepCount=" + cntx.getDeepCount());
-        if(!cntx.getTd().isComplexType()){
-            return new LinkedList<>();
-        }
-
-        List<TableRow> resList = new LinkedList<>();
-        List<TableRow> rows = new LinkedList<>();
-        if(cntx.isElementAsRow()){
-            TableRow rootRow = buildRootRow(cntx);
-            rows.add(rootRow);
-        }
-
-        //Process base type anyway
-        //If the processed type is complex then process it base type tables and check them for merging with the current type table
-        //Merge may be performed on both a root indicator content rows and attributes rows
-        //TODO: вынести обработку базового типа и мерджа в createModelByTd
-        *//*final TypeDescriptor currTd = cntx.getTd();
-        if(currTd.getComplexContentType() != null){
-            log.debug("Process for base type.");
-            if(cntx.getTd().getBaseType() != null){
-                //Processed type and its base type must have the same types of root indicators.
-                //May base type hasn't root indicator declaration at all? I don't know :(
-                //todo: investigate this question (it's seems that may be)
-                if(currTd.getBaseType().getRootIndicator() != null){
-                    if(currTd.getRootIndicator().getType() != currTd.getBaseType().getRootIndicator().getType() ){
-                        throw new RuntimeException("Incompatible types of root indicators!");
-
-                    }else{
-                        List<TableRow> baseRows = getComplexTypeRows(cntx.switchContextForNewTd(currTd.getBaseType(), cntx.getDeepCount()));
-                        if (cntx.isMergeWithBaseType()) {
-                            //Perform merge root indicator content of the processed type and root indicator content its base type.
-                            if( log.isDebugEnabled() ){
-                                if(cntx.isElementAsRow()){
-                                    log.debug("Perform merge root indicators content.");
-                                } else {
-                                    log.debug("Perform merge attributes.");
-                                }
-                            }
-                            resList = mergeContent(rows, baseRows, cntx.isElementAsRow());
-                        }
-                    }
-                }
-            }
-
-        } else {
-            resList = rows;
-        }*//*
-
-        resList = rows;
-        return resList;
-    }*/
-
-
-    //private TableRow getGroupRows
-
 
     /**
      * Return a rows tree for the processed type/group only without any analysing or merging operations
@@ -723,7 +606,7 @@ public class ViewModelCreator {
      * @param cntx
      * @return
      */
-    private TableRow buildRootRow(final ModelBuildCntx cntx){
+    private static TableRow buildRootRow(final ModelBuildCntx cntx){
         TypeDescriptor td = cntx.getTd();
         GroupDescriptor gd = cntx.getGd();
 
@@ -820,7 +703,7 @@ public class ViewModelCreator {
      * @param cntx
      * @return - a TableRow instance contains information about an indicator.
      */
-    private TableRow getIndicatorDescrRow(IndicatorDescriptor processedIndicator,
+    private static TableRow getIndicatorDescrRow(IndicatorDescriptor processedIndicator,
                                           Set<TypeDescriptor> typesForPostProcessing,
                                           Set<GroupDescriptor> groupsForPostProcessing,
                                           ModelBuildCntx cntx){
@@ -932,7 +815,7 @@ public class ViewModelCreator {
      * @param cntx
      * @return ElemAttrDescrRow
      */
-    private ElemAttrDescrRow buildElemDescrRow(ElementDescriptor ed,
+    private static ElemAttrDescrRow buildElemDescrRow(ElementDescriptor ed,
                                            Set<TypeDescriptor> typesForPostProcessing,
                                            ModelBuildCntx cntx){
         log.debug("\tbuildElemDescrRow | element"+ed.getName());
@@ -1027,7 +910,7 @@ public class ViewModelCreator {
      * @param cntx
      * @return
      */
-    private ElemAttrDescrRow getGroupRefDescrRow(GroupReference gf,
+    private static ElemAttrDescrRow getGroupRefDescrRow(GroupReference gf,
                                          Set<GroupDescriptor> groupsForPostProcessing,
                                          ChangeInfoDetails chid,
                                          ModelBuildCntx cntx) {
@@ -1093,7 +976,7 @@ public class ViewModelCreator {
      * @return List<TableRow>
      */
     //private List<TableRow> getCurrentTypeAttrRows(TypeDescriptor td, Map<TypeDescriptor, TypeDiffInfo> dfMap, Set<TypeDescrTable> tableSet, int deepCount){
-    private List<TableRow> getCurrentTypeAttrRows(ModelBuildCntx cntx){
+    private static List<TableRow> getCurrentTypeAttrRows(ModelBuildCntx cntx){
         TypeDescriptor td = cntx.getTd();
         log.debug("Get rows for type "+td+"; deepCount="+cntx.getDeepCount());
         Set<TypeDescriptor> typesForPostProcessing = new HashSet<>();
@@ -1211,7 +1094,11 @@ public class ViewModelCreator {
     }
 
 
-    private TypeDescrTable findTypeDescrTable(String tableId, Set<TypeDescrTable> tableSet){
+    public static TypeDescrTable findTypeDescrTableByTd(TypeDescriptor td, Set<TypeDescrTable> tableSet){
+        return findTypeDescrTable(buildTypeDescrTableId(td), tableSet);
+    }
+
+    public static TypeDescrTable findTypeDescrTable(String tableId, Set<TypeDescrTable> tableSet){
         TypeDescrTable resTable = null;
 
         if(tableId!=null){
@@ -1228,11 +1115,11 @@ public class ViewModelCreator {
     }
 
 
-    private ChangeInfoDetails getChngNfoDetailsInParentScope(ParticleContent pc,
-                                                                TypeDescriptor td,
-                                                                    GroupDescriptor gd,
-                                                                        Map<TypeDescriptor, TypeDiffInfo> dfTypeMap,
-                                                                            Map<GroupDescriptor, GroupDiffInfo> dfGroupMap){
+    private static ChangeInfoDetails getChngNfoDetailsInParentScope(ParticleContent pc,
+                                                                        TypeDescriptor td,
+                                                                            GroupDescriptor gd,
+                                                                                Map<TypeDescriptor, TypeDiffInfo> dfTypeMap,
+                                                                                    Map<GroupDescriptor, GroupDiffInfo> dfGroupMap){
         ChangeInfoDetails chid = null;
         if(td != null){
             if( dfTypeMap.containsKey(td) ){
@@ -1252,7 +1139,7 @@ public class ViewModelCreator {
     }
 
 
-    private String getCardinalityCellVal(Long minOcc, Long maxOcc, boolean isMaxOccUnbound){
+    private static String getCardinalityCellVal(Long minOcc, Long maxOcc, boolean isMaxOccUnbound){
         String cardinality = String.valueOf(minOcc);
         String maxCard = String.valueOf(maxOcc);
         if(isMaxOccUnbound){
@@ -1305,7 +1192,7 @@ public class ViewModelCreator {
      * @param tableSet
      * @return found table or null
      */
-    public TypeDescrTable searchTypeTableById(final String id, final Set<TypeDescrTable> tableSet){
+    public static TypeDescrTable searchTypeTableById(final String id, final Set<TypeDescrTable> tableSet){
         if(id == null || tableSet == null){
             return null;
         }
@@ -1321,7 +1208,7 @@ public class ViewModelCreator {
     }
 
 
-    public GroupDescrTable searchGroupTableById(final String id, final Set<GroupDescrTable> tableSet){
+    public static GroupDescrTable searchGroupTableById(final String id, final Set<GroupDescrTable> tableSet){
         if(id == null || tableSet == null){
             return null;
         }
@@ -1478,15 +1365,19 @@ public class ViewModelCreator {
      * @return new filtered Set instance
      */
     @SuppressWarnings("unchecked")
-    public Set<TypeDescrTable> filterTableSetFromWSMethodTypes(Set<TypeDescrTable> typeTbls, Set<WSMethodDescrTable> methodTbls){
+    public Set<TypeDescrTable> filterTableSetFromMessagePartTypes(Set<TypeDescrTable> typeTbls, Set<WSMethodDescrTable> methodTbls){
         Set<TypeDescrTable> methodTypeTbls = new HashSet<>();
 
         for (WSMethodDescrTable methodTbl : methodTbls){
-            if( methodTbl.getRequestParams() != null){
-                methodTypeTbls.add( methodTbl.getRequestParams() );
+            if( ! methodTbl.getInputMessage().isEmpty() ){
+                for(MessagePartDescrTable msgPartTbl : methodTbl.getInputMessage()) {
+                    methodTypeTbls.add(msgPartTbl.getTypeDescr());
+                }
             }
-            if( methodTbl.getResponseParams() != null){
-                methodTypeTbls.add( methodTbl.getResponseParams() );
+            if( ! methodTbl.getOutputMessage().isEmpty() ){
+                for(MessagePartDescrTable msgPartTbl : methodTbl.getOutputMessage()) {
+                    methodTypeTbls.add(msgPartTbl.getTypeDescr());
+                }
             }
         }
 
@@ -1562,19 +1453,19 @@ public class ViewModelCreator {
      * @param strQName
      * @return String
      */
-    static public String getLocalPartTypeName(String strQName){
+    public static String getLocalPartTypeName(String strQName){
         return TypeDescrTable.getLocalPartTypeName(strQName);
     }
 
-    private String getIndicatorName(Class<? extends XmlSchemaGroupParticle> groupParticleType){
+    private static String getIndicatorName(Class<? extends XmlSchemaGroupParticle> groupParticleType){
         return groupParticleType.getSimpleName().replace("XmlSchema", "");
     }
 
-    private String buildGroupDescrTableId(GroupDescriptor gd){
+    private static String buildGroupDescrTableId(GroupDescriptor gd){
         return GROUP_TABLE_ID_PREFIX + gd.getId();
     }
 
-    private String buildTypeDescrTableId(TypeDescriptor td){
+    private static String buildTypeDescrTableId(TypeDescriptor td){
         return TYPE_TABLE_ID_PREFIX + td.getId();
     }
 }

@@ -5,6 +5,7 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.Sets;
 import ru.aklimov.wsdlcomparator.differentiator.AffectResearcher;
 import ru.aklimov.wsdlcomparator.differentiator.GroupDiffService;
+import ru.aklimov.wsdlcomparator.differentiator.MessageDiffService;
 import ru.aklimov.wsdlcomparator.differentiator.TypeDiffService;
 import ru.aklimov.wsdlcomparator.domain.DescriptorsContainer;
 import ru.aklimov.wsdlcomparator.domain.DiffContainer;
@@ -14,9 +15,10 @@ import ru.aklimov.wsdlcomparator.domain.diff.*;
 import org.apache.commons.collections.ListUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.aklimov.wsdlcomparator.domain.diff.impl.DiffWSMethodInfo;
+import ru.aklimov.wsdlcomparator.domain.diff.impl.WSMethodDiffInfo;
 import ru.aklimov.wsdlcomparator.domain.diff.impl.GroupDiffInfo;
 import ru.aklimov.wsdlcomparator.domain.diff.impl.TypeDiffInfo;
+import ru.aklimov.wsdlcomparator.domain.diff.impl.WsdlMessagePartDiffInfo;
 
 import java.util.*;
 
@@ -37,8 +39,8 @@ public class DifferenceComputer {
      * @return Set<DiffWSMethodInfo>
      */
     @SuppressWarnings("unchecked")
-    static public Set<DiffWSMethodInfo> getWSMethodDiff(Set<WSMethodDescr> newWSMethods, Set<WSMethodDescr> oldWSMethods, Set<TypeDiffInfo> typeDiff){
-        Set<DiffWSMethodInfo> resSet = new HashSet<>();
+    static public Set<WSMethodDiffInfo> getWSMethodDiff(Set<WSMethodDescr> newWSMethods, Set<WSMethodDescr> oldWSMethods, Set<TypeDiffInfo> typeDiff){
+        Set<WSMethodDiffInfo> resSet = new HashSet<>();
         //There is ListUtils.intersection method is used instead of CollectionUtils.intersection because of
         //CollectionUtils.intersection contains a bug will be fiex in 4.x version of commons-collections library
         List<WSMethodDescr> tmpNewWSMethodsLst = new LinkedList<>();
@@ -48,94 +50,100 @@ public class DifferenceComputer {
 
         log.debug("\n\tSTART WS METHOD DESCRIPTORS DIFF\n");
 
+        /////////
+        // Search added methods
+        /////////
         Collection<WSMethodDescr> addedWSMethods = ListUtils.removeAll(tmpNewWSMethodsLst, tmpOldWSMethodsLst);
         log.debug("Start processing added methods.");
         for(WSMethodDescr method : addedWSMethods){
             log.debug("Method descriptors for processing: " + method.getMethodName() );
-            DiffWSMethodInfo diffMethod = new DiffWSMethodInfo();
+            WSMethodDiffInfo diffMethod = new WSMethodDiffInfo();
             diffMethod.setWsMethodDescr(method);
-            diffMethod.setChangeType(DiffWSMethodInfo.WSMETHOD_CHANGE_TYPE.NEW);
-            if(method.getRequestType()!=null){
-                TypeDiffInfo typeDiffInfo = searchDiffNfoByType(method.getRequestType(), typeDiff);
-                diffMethod.setRequestTypeDiffInfo(typeDiffInfo);
-
-            }
-            if(method.getResponseType()!=null){
-                TypeDiffInfo typeDiffInfo = searchDiffNfoByType(method.getResponseType(), typeDiff);
-                diffMethod.setResponseTypeDiffInfo(typeDiffInfo);
-
-            }
+            diffMethod.setChangeType(WSMethodDiffInfo.WSMETHOD_CHANGE_TYPE.NEW);
             resSet.add(diffMethod);
         }
 
+        /////////
+        //Search removed methods
+        /////////
         Collection<WSMethodDescr> removedWSMethods = ListUtils.removeAll(tmpOldWSMethodsLst, tmpNewWSMethodsLst);
         log.debug("Start processing removed methods.");
         for(WSMethodDescr method : removedWSMethods){
             log.debug("Method descriptors for processing: " + method.getMethodName() );
-            DiffWSMethodInfo diffMethod = new DiffWSMethodInfo();
+            WSMethodDiffInfo diffMethod = new WSMethodDiffInfo();
             diffMethod.setWsMethodDescr(method);
-            diffMethod.setChangeType(DiffWSMethodInfo.WSMETHOD_CHANGE_TYPE.DELETE);
-            if(method.getRequestType()!=null){
-                TypeDiffInfo typeDiffInfo = searchDiffNfoByType(method.getRequestType(), typeDiff);
-                diffMethod.setRequestTypeDiffInfo(typeDiffInfo);
-            }
-            if(method.getResponseType()!=null){
-                TypeDiffInfo typeDiffInfo = searchDiffNfoByType(method.getResponseType(), typeDiff);
-                diffMethod.setResponseTypeDiffInfo(typeDiffInfo);
-            }
+            diffMethod.setChangeType(WSMethodDiffInfo.WSMETHOD_CHANGE_TYPE.DELETE);
             resSet.add(diffMethod);
         }
 
         Collection<WSMethodDescr> intersectMethods = ListUtils.intersection( tmpNewWSMethodsLst, tmpOldWSMethodsLst);
 
-        //Find TypeDiffInfo's for Request/Response types
+        /////////
+        //Find TypeDiffInfo's for Input/Output messages.
+        /////////
         log.debug("Start processing survived methods.");
         for(WSMethodDescr method : intersectMethods){
             log.debug("Method descriptors for processing: " + method.getMethodName() );
-            TypeDiffInfo requestTypeDiffInfo = searchDiffNfoByType(method.getRequestType(), typeDiff);
+            WSMethodDescr oldMethodDescr = tmpOldWSMethodsLst.get(tmpOldWSMethodsLst.indexOf(method));
+            WSMethodDescr newMethodDescr = tmpNewWSMethodsLst.get( tmpNewWSMethodsLst.indexOf(method) );
+
+            Map<WSMethodDescr.MessagePartDescr, WsdlMessagePartDiffInfo> inMsgDiffInfo =
+                    MessageDiffService.compareMessages(oldMethodDescr.getInputMessage(), newMethodDescr.getInputMessage(), typeDiff);
+            boolean inPartsReordered = MessageDiffService.isPartsReordered(oldMethodDescr.getInputMessage(), newMethodDescr.getInputMessage());
+
             /////////
             //Response may be deleted or added
             /////////
-            WSMethodDescr oldMethodDescr = tmpOldWSMethodsLst.get(tmpOldWSMethodsLst.indexOf(method));
-            WSMethodDescr newMethodDescr = tmpNewWSMethodsLst.get( tmpOldWSMethodsLst.indexOf(method) );
-            if(newMethodDescr.getResponseType()!=null && oldMethodDescr.getResponseType()==null){
-                //RESPONSE HAS BEEN ADDED
-                DiffWSMethodInfo diffMethod = new DiffWSMethodInfo();
+            boolean isResponseAdded = ! newMethodDescr.getOutputMessage().isEmpty() &&  oldMethodDescr.getOutputMessage().isEmpty();
+            boolean isResponseDeleted = newMethodDescr.getOutputMessage().isEmpty() && ! oldMethodDescr.getOutputMessage().isEmpty();
+            Map<WSMethodDescr.MessagePartDescr, WsdlMessagePartDiffInfo> outMsgDiffInfo = new HashMap<>();
+
+            boolean outPartsReordered = false;
+            if( ! isResponseDeleted && ! isResponseAdded){
+                outMsgDiffInfo = MessageDiffService.compareMessages(oldMethodDescr.getInputMessage(), newMethodDescr.getInputMessage(), typeDiff);
+                outPartsReordered = MessageDiffService.isPartsReordered(oldMethodDescr.getInputMessage(), newMethodDescr.getInputMessage());
+            }
+
+            /////////
+            //Construct result DiffInfo
+            /////////
+            if( ! inMsgDiffInfo.isEmpty() ||inPartsReordered ||
+                    isResponseDeleted || isResponseAdded ||
+                    ! outMsgDiffInfo.isEmpty() || outPartsReordered){
+
+                WSMethodDiffInfo diffMethod = new WSMethodDiffInfo();
                 diffMethod.setWsMethodDescr(method);
-                diffMethod.setChangeType( DiffWSMethodInfo.WSMETHOD_CHANGE_TYPE.RESPONSE_ADD );
-                resSet.add(diffMethod);
-                if( log.isDebugEnabled() ){
-                    log.debug("\n\t" + diffMethod.toString());
+                diffMethod.setChangeType(WSMethodDiffInfo.WSMETHOD_CHANGE_TYPE.CHANGE_MESSAGE_PART);
+
+                if(! inMsgDiffInfo.isEmpty()){
+                    diffMethod.getChangedInMsgParts().putAll(inMsgDiffInfo);
                 }
 
-            } else if(newMethodDescr.getResponseType()==null && oldMethodDescr.getResponseType()!=null){
-                //RESPONSE HAS BEEN DELETED
-                DiffWSMethodInfo diffMethod = new DiffWSMethodInfo();
-                diffMethod.setWsMethodDescr(method);
-                diffMethod.setRequestTypeDiffInfo(requestTypeDiffInfo);
-                diffMethod.setDeletedReponseType(oldMethodDescr.getResponseType());
-                diffMethod.setChangeType( DiffWSMethodInfo.WSMETHOD_CHANGE_TYPE.RESPONSE_DEL );
-                resSet.add(diffMethod);
-                if( log.isDebugEnabled() ){
-                    log.debug("\n\t" + diffMethod.toString());
+                if(inPartsReordered){
+                    diffMethod.setInMsgPartReordered(true);
                 }
 
-            } else {
-                TypeDiffInfo responseTypeDiffInfo = searchDiffNfoByType(method.getResponseType(), typeDiff);
-                if(requestTypeDiffInfo !=null || responseTypeDiffInfo !=null){
-                    //SOME CHANGES HAVE BEEN MADE IN REQUEST OR RESPONSE
-                    DiffWSMethodInfo diffMethod = new DiffWSMethodInfo();
-                    diffMethod.setWsMethodDescr(method);
-                    diffMethod.setRequestTypeDiffInfo(requestTypeDiffInfo);
-                    diffMethod.setResponseTypeDiffInfo(responseTypeDiffInfo);
-                    diffMethod.setChangeType( DiffWSMethodInfo.WSMETHOD_CHANGE_TYPE.CHANGE_MESSAGE_PART );
-                    resSet.add(diffMethod);
-                    if( log.isDebugEnabled() ){
-                        log.debug("\n\t" + diffMethod.toString());
+                if(isResponseAdded || isResponseDeleted){
+                    if(isResponseAdded){
+                        diffMethod.setChangeType( WSMethodDiffInfo.WSMETHOD_CHANGE_TYPE.RESPONSE_ADD );
+                    } else {
+                        diffMethod.setChangeType( WSMethodDiffInfo.WSMETHOD_CHANGE_TYPE.RESPONSE_DEL );
+                        diffMethod.getDeletedOutputMessage().addAll( oldMethodDescr.getOutputMessage() );
                     }
 
+                } else {
+                    if(! outMsgDiffInfo.isEmpty()){
+                        diffMethod.getChangedOutMsgParts().putAll(outMsgDiffInfo);
+                    }
+                    if(outPartsReordered){
+                        diffMethod.setOutMsgPartReordered(true);
+                    }
                 }
 
+                resSet.add(diffMethod);
+                if( log.isDebugEnabled() ){
+                    log.debug("\n\t" + diffMethod.toString());
+                }
             }
 
         }
@@ -154,7 +162,7 @@ public class DifferenceComputer {
      */
     public static CompareResult getFullWsdlDiff(final WSDLProcessor.WSDLProcessingResult newResult, final WSDLProcessor.WSDLProcessingResult oldResult){
         DiffContainer itemsDiffs = getXSDItemsDiffs(newResult.getDescriptorContainer(), oldResult.getDescriptorContainer());
-        Set<DiffWSMethodInfo> wsMethodDiff = getWSMethodDiff(newResult.getWsMethodDescr(), oldResult.getWsMethodDescr(), itemsDiffs.getTypeDiffInfos());
+        Set<WSMethodDiffInfo> wsMethodDiff = getWSMethodDiff(newResult.getWsMethodDescr(), oldResult.getWsMethodDescr(), itemsDiffs.getTypeDiffInfos());
 
         CompareResult cr = new CompareResult(itemsDiffs.getTypeDiffInfos(), itemsDiffs.getGroupDiffInfos(), wsMethodDiff);
         return cr;

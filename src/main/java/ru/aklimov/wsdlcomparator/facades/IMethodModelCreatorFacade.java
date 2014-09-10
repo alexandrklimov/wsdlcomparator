@@ -1,10 +1,10 @@
 package ru.aklimov.wsdlcomparator.facades;
 
 import ru.aklimov.wsdlcomparator.domain.descriptors.WSMethodDescr;
-import ru.aklimov.wsdlcomparator.domain.diff.impl.DiffWSMethodInfo;
+import ru.aklimov.wsdlcomparator.domain.diff.impl.WSMethodDiffInfo;
 import ru.aklimov.wsdlcomparator.domain.tblmodel.GroupDescrTable;
 import ru.aklimov.wsdlcomparator.domain.tblmodel.TypeDescrTable;
-import ru.aklimov.wsdlcomparator.domain.tblmodel.WSMethodDescrTable;
+import ru.aklimov.wsdlcomparator.domain.tblmodel.method.WSMethodDescrTable;
 
 import java.util.Set;
 
@@ -13,25 +13,25 @@ import java.util.Set;
  */
 public interface IMethodModelCreatorFacade {
 
-    public Set<WSMethodDescrTable> createWSMethodModelByDiffInfo(Set<DiffWSMethodInfo> wsMethodsDiffs,
+    public Set<WSMethodDescrTable> createWSMethodModelByDiffInfo(Set<WSMethodDiffInfo> wsMethodsDiffs,
                                                                  Set<TypeDescrTable> typeTbls,
                                                                  Set<GroupDescrTable> groupTbls,
                                                                  boolean includeRefGroup,
                                                                  boolean mergeWithBaseType,
                                                                  int deepCount);
 
-    public Set<WSMethodDescrTable> createWSMethodModelByDiffInfo(Set<DiffWSMethodInfo> wsMethodsDiffs,
+    public Set<WSMethodDescrTable> createWSMethodModelByDiffInfo(Set<WSMethodDiffInfo> wsMethodsDiffs,
                                                                  Set<TypeDescrTable> typeTbls,
                                                                  Set<GroupDescrTable> groupTbls,
                                                                  boolean includeRefGroup,
                                                                  boolean mergeWithBaseType);
 
-    public Set<WSMethodDescrTable> createWSMethodModelByDiffInfo(Set<DiffWSMethodInfo> wsMethodsDiffs,
+    public Set<WSMethodDescrTable> createWSMethodModelByDiffInfo(Set<WSMethodDiffInfo> wsMethodsDiffs,
                                                                  Set<TypeDescrTable> typeTbls,
                                                                  Set<GroupDescrTable> groupTbls,
                                                                  int deepCount);
 
-    public Set<WSMethodDescrTable> createWSMethodModelByDiffInfo(Set<DiffWSMethodInfo> wsMethodsDiffs,
+    public Set<WSMethodDescrTable> createWSMethodModelByDiffInfo(Set<WSMethodDiffInfo> wsMethodsDiffs,
                                                                  Set<TypeDescrTable> typeTbls,
                                                                  Set<GroupDescrTable> groupTbls);
 

@@ -28,6 +28,7 @@ public class WSDLProcessor {
     static private final String OUTPUT_MESSAGE_KEY = "output";
     static private final String PORT_TYPES_PROCESS_OPERATION_LIST = "operation_list";
     static private final String PORT_TYPES_PROCESS_OPER_TO_MSGS_MAP = "operations_to_messages";
+    static private final String PORT_TYPES_OPER_TO_PORT_QNAME = "operations_to_porttype_qname_map";
     static private final String MESSAGE_PROCESS_ROOT_WSDL_MSG_ELEM_NAMES = "rootWSDLMessageElementNames";
     static private final String MESSAGE_PROCESS_ROOT_WSDL_MSG_TYPE_NAMES = "rootWSDLMessageTypeNames";
     static private final String MESSAGE_PROCESS_ELEM_QNAME_TO_MSG_MAP = "elemQNameToMessage";
@@ -56,11 +57,13 @@ public class WSDLProcessor {
         log.info("\n\tSTART WSDL PROCESSING\n");
 
         Map<String, Object> processPortTypesRes = processPortTypes(definition);
-        Map<String, Object> messagesProcessingRes = messagesProcessing(definition);
-        List<QName> rootWSDLMessageElementNames = (List<QName>) messagesProcessingRes.get(MESSAGE_PROCESS_ROOT_WSDL_MSG_ELEM_NAMES);
-        List<QName> rootWSDLMessageTypeNames = (List<QName>) messagesProcessingRes.get(MESSAGE_PROCESS_ROOT_WSDL_MSG_TYPE_NAMES);
-        Map<QName, List<Message>> elemQNameToMessage = (Map<QName, List<Message>>) messagesProcessingRes.get(MESSAGE_PROCESS_ELEM_QNAME_TO_MSG_MAP);
-        Map<QName, List<Message>> typeQNameToMessage = (Map<QName, List<Message>>) messagesProcessingRes.get(MESSAGE_PROCESS_TYPE_QNAME_TO_MSG_MAP);
+        MessageProcessingResult messagesProcessingRes = messagesProcessing(definition);
+        List<QName> rootWSDLMessageElementQNames = messagesProcessingRes.getRootWSDLMessageElementNames();
+        List<QName> rootWSDLMessageTypeQNames = messagesProcessingRes.getRootWSDLMessageTypeNames();
+        //Map<QName, List<Message>> elemQNameToMessage = (Map<QName, List<Message>>) messagesProcessingRes.get(MESSAGE_PROCESS_ELEM_QNAME_TO_MSG_MAP);
+        Map<QName, List<Part>> elemQNameToPart = messagesProcessingRes.getElemQNameToPart();
+        //Map<QName, List<Message>> typeQNameToMessage = (Map<QName, List<Message>>) messagesProcessingRes.get(MESSAGE_PROCESS_TYPE_QNAME_TO_MSG_MAP);
+        Map<QName, List<Part>> typeQNameToPart = messagesProcessingRes.getTypeQNameToPart();
 
         //XSD schemas obtaining
         XmlSchema[] schemas =  getXmlSchemaCollection(definition);
@@ -81,7 +84,7 @@ public class WSDLProcessor {
         Map<QName, XmlSchemaElement> xsdElemQNameToElemMap = new HashMap<>();
         Map<QName, XmlSchemaGroup> xsdGroupQNameToGroupMap = new HashMap<>();
         Map<XmlSchemaType, QName> typeToElementQName = new HashMap<>();
-        Map<XmlSchemaType, List<Message>> typeToMessage = new HashMap<>();
+        Map<XmlSchemaType, List<Part>> xsdTypeToPart = new HashMap<>();
 
         //There is collecting all schema non-anonymous type declarations into a map
         //and all root element declarations into a map
@@ -98,8 +101,8 @@ public class WSDLProcessor {
             xsdTypeMap.putAll( schema.getSchemaTypes() );
             Set<QName> qTypeNames = xsdTypeMap.keySet();
             for(QName typeQName : qTypeNames){
-                if(typeQNameToMessage.containsKey(typeQName)){
-                    typeToMessage.put( xsdTypeMap.get(typeQName), typeQNameToMessage.get(typeQName) );
+                if(typeQNameToPart.containsKey(typeQName)){
+                    xsdTypeToPart.put(xsdTypeMap.get(typeQName), typeQNameToPart.get(typeQName));
                 }
             }
 
@@ -107,11 +110,11 @@ public class WSDLProcessor {
 
         }
 
-        //Resolving XSD type for root descriptors will be built
-        //Transform (message_part_element_namemessage binding to message-part-type-name-to-message one.
-        if( !rootWSDLMessageElementNames.isEmpty() ){
+        //Resolving XSD type for root descriptors that will be built
+        //Transform (messagePart_elementName->message binding to messagePart_typeName->message one.
+        if( !rootWSDLMessageElementQNames.isEmpty() ){
             for(XmlSchema schema : schemas){ //<-- for each schema
-                for(QName elemQName : rootWSDLMessageElementNames){ //<--for each WSDL message element
+                for(QName elemQName : rootWSDLMessageElementQNames){ //<--for each WSDL message element
                     XmlSchemaElement element = schema.getElementByName(elemQName);//<--return roots descriptors QName
                     if( element != null){
                         XmlSchemaType schemaType = element.getSchemaType();
@@ -122,8 +125,8 @@ public class WSDLProcessor {
                         typeToElementQName.put(schemaType, elemQName);
                         xsdRootElemTypes.add(schemaType);
 
-                        if(elemQNameToMessage.containsKey(elemQName)){
-                            typeToMessage.put(schemaType, elemQNameToMessage.get(elemQName));
+                        if(elemQNameToPart.containsKey(elemQName)){
+                            xsdTypeToPart.put(schemaType, elemQNameToPart.get(elemQName));
                         }
 
                     }
@@ -131,8 +134,8 @@ public class WSDLProcessor {
             }
         }
 
-        if( !rootWSDLMessageTypeNames.isEmpty() ){
-            for(QName name : rootWSDLMessageTypeNames){
+        if( !rootWSDLMessageTypeQNames.isEmpty() ){
+            for(QName name : rootWSDLMessageTypeQNames){
                 XmlSchemaType type = xsdTypeMap.get(name);
                 xsdRootElemTypes.add(type);
             }
@@ -176,27 +179,26 @@ public class WSDLProcessor {
             typeDescrSet.addAll(typeToDescriptorMap.values());
         }
 
-        Map<TypeDescriptor, List<Message>> tdToMessages = createTdToMessageMap(typeToDescriptorMap, typeToMessage);
+        Map<Part, TypeDescriptor> partToTypeDescr = createPartToTypeDescrMap(typeToDescriptorMap, xsdTypeToPart);
         Map<Operation, Map<String, Message>> operationsToMessages = (Map<Operation, Map<String, Message>>) processPortTypesRes.get(PORT_TYPES_PROCESS_OPER_TO_MSGS_MAP);
-        Set<WSMethodDescr> wsMethodDescr = getWSMethodDescription(operationsToMessages, tdToMessages);
+        Map<Operation, QName> operationToPortTypeQNameMap = (Map<Operation, QName>) processPortTypesRes.get(PORT_TYPES_OPER_TO_PORT_QNAME);
+        Set<WSMethodDescr> wsMethodDescr = buildWSMethodDescription(operationsToMessages, messagesProcessingRes.getMessageToPart(), partToTypeDescr, operationToPortTypeQNameMap);
 
         DescriptorsContainer descriptorsContainer = new DescriptorsContainer(typeDescrSet, groupDescrSet);
-        WSDLProcessingResult wsdlProcRes = new WSDLProcessingResult(descriptorsContainer, operationsToMessages, tdToMessages, wsMethodDescr);
+        WSDLProcessingResult wsdlProcRes = new WSDLProcessingResult(descriptorsContainer, operationsToMessages, wsMethodDescr);
 
         return wsdlProcRes;
     }
 
 
-    static private Map<TypeDescriptor, List<Message>> createTdToMessageMap(
-            Map<XmlSchemaType, TypeDescriptor> typeToTdMap,
-            Map<XmlSchemaType, List<Message>> typeToMessageMap){
+    static private Map<Part, TypeDescriptor> createPartToTypeDescrMap(Map<XmlSchemaType, TypeDescriptor> xsdTypeToTdMap,
+                                                                            Map<XmlSchemaType, List<Part>> xsdTypeToPartMap){
+        Map<Part, TypeDescriptor> resMap = new HashMap<>();
 
-        Map<TypeDescriptor, List<Message>> resMap = new HashMap<>();
-        for(Map.Entry<XmlSchemaType, TypeDescriptor> typeToTdEntry : typeToTdMap.entrySet()){
-            XmlSchemaType key = typeToTdEntry.getKey();
-            if( typeToMessageMap.containsKey( key ) ){
-                List<Message> msgLst = typeToMessageMap.get( key );
-                resMap.put(typeToTdEntry.getValue(), msgLst);
+        for(XmlSchemaType xsdType : xsdTypeToPartMap.keySet()){
+            List<Part> parts = xsdTypeToPartMap.get(xsdType);
+            for(Part part : parts){
+                resMap.put(part, xsdTypeToTdMap.get(xsdType));
             }
         }
 
@@ -204,13 +206,16 @@ public class WSDLProcessor {
     }
 
 
-    static public Set<WSMethodDescr> getWSMethodDescription(Map<Operation, Map<String, Message>> operationsToMessages,
-                                                            Map<TypeDescriptor, List<Message>> typeDescriptorToMessage){
-        log.debug("START getWSMethodDescription");
+    static public Set<WSMethodDescr> buildWSMethodDescription(Map<Operation, Map<String, Message>> operationsToMessages,
+                                                              Map<Message, List<Part>> messageToParts,
+                                                              Map<Part, TypeDescriptor> partsToTypeDescr,
+                                                              Map<Operation, QName> operationToPortTypeQNameMap){
+        log.debug("START buildWSMethodDescription");
         Set<WSMethodDescr> resSet = new HashSet<>();
 
         for(Operation operation : operationsToMessages.keySet()){
             WSMethodDescr tmpWSMethod = new WSMethodDescr();
+            tmpWSMethod.setPortTypeName( operationToPortTypeQNameMap.get(operation) );
             tmpWSMethod.setMethodName( operation.getName() );
             log.debug("Method name(Operation name): " + operation.getName() );
 
@@ -218,37 +223,35 @@ public class WSDLProcessor {
             Message inputMsg = messages.get(INPUT_MESSAGE_KEY);
             Message outputMsg = messages.get(OUTPUT_MESSAGE_KEY);
 
-            //Find type descriptor by message
-            boolean foundInput = false;
-            boolean foundOutput = false;
-            for(Map.Entry<TypeDescriptor, List<Message>> entry : typeDescriptorToMessage.entrySet() ){
-                if(entry.getValue().contains(inputMsg)){
-                    TypeDescriptor td = entry.getKey();
-                    tmpWSMethod.setRequestType(td);
-                    tmpWSMethod.setRequestNamespace( td.getNamespaceURI() );
-                    foundInput = true;
-
-                } else if(entry.getValue().contains(outputMsg)){
-                    TypeDescriptor td = entry.getKey();
-                    tmpWSMethod.setResponseType(td);
-                    tmpWSMethod.setResponseNamespace( td.getNamespaceURI() );
-                    foundOutput = true;
-                }
-
-                if(foundInput && foundOutput){
-                    break;
-                }
-
+            //Build input message parts descriptors
+            List<Part> inputParts = messageToParts.get(inputMsg);
+            for(Part inMsgPart : inputParts){
+                TypeDescriptor td = partsToTypeDescr.get(inMsgPart);
+                WSMethodDescr.MessagePartDescr partDescr =
+                                                new WSMethodDescr.MessagePartDescr(inMsgPart.getName(),
+                                                                                    (inMsgPart.getElementName()!= null),
+                                                                                    inMsgPart.getElementName(),
+                                                                                    td);
+                tmpWSMethod.getInputMessage().add(partDescr);
             }
-            log.debug("Input type is found: "+foundInput);
-            log.debug("Output type is found: "+foundOutput);
+            
+            //Build output message parts descriptors
+            List<Part> outputParts = messageToParts.get(outputMsg);
+            for(Part outMsgPart : inputParts){
+                TypeDescriptor td = partsToTypeDescr.get(outMsgPart);
+                WSMethodDescr.MessagePartDescr partDescr =
+                        new WSMethodDescr.MessagePartDescr(outMsgPart.getName(),
+                                (outMsgPart.getElementName()!= null),
+                                outMsgPart.getElementName(),
+                                td);
+                tmpWSMethod.getOutputMessage().add(partDescr);
+            }
+
             log.debug(tmpWSMethod.toString());
-
             resSet.add(tmpWSMethod);
-
         }
 
-        log.debug("END getWSMethodDescription");
+        log.debug("END buildWSMethodDescription");
         return resSet;
     }
 
@@ -261,7 +264,7 @@ public class WSDLProcessor {
     static public class WSDLProcessingResult{
         DescriptorsContainer descriptorContainer;
         Map<Operation, Map<String, Message>> operationsToMessages = new HashMap<>();
-        Map<TypeDescriptor, List<Message>> typeDescriptorToMessage = new HashMap<>();
+        //Map<TypeDescriptor, List<Message>> typeDescriptorToMessage = new HashMap<>();
         Set<WSMethodDescr> wsMethodDescr = new HashSet<>();
 
         /**
@@ -271,11 +274,11 @@ public class WSDLProcessor {
          */
         public WSDLProcessingResult(DescriptorsContainer typeDescriptors,
                                     Map<Operation, Map<String, Message>> operationsToMessages,
-                                    Map<TypeDescriptor, List<Message>> typeDescriptorToMessage,
+                                    //Map<TypeDescriptor, List<Message>> typeDescriptorToMessage,
                                     Set<WSMethodDescr> wsMethodDescr) {
             this.descriptorContainer = typeDescriptors;
             this.operationsToMessages = operationsToMessages;
-            this.typeDescriptorToMessage = typeDescriptorToMessage;
+            //this.typeDescriptorToMessage = typeDescriptorToMessage;
             this.wsMethodDescr = wsMethodDescr;
         }
 
@@ -287,9 +290,9 @@ public class WSDLProcessor {
             return operationsToMessages;
         }
 
-        public Map<TypeDescriptor, List<Message>> getTypeDescriptorToMessage() {
+       /* public Map<TypeDescriptor, List<Message>> getTypeDescriptorToMessage() {
             return typeDescriptorToMessage;
-        }
+        }*/
 
         public Set<WSMethodDescr> getWsMethodDescr() {
             return wsMethodDescr;
@@ -321,6 +324,7 @@ public class WSDLProcessor {
 
         List<Operation> operations = new LinkedList<>();
         Map<Operation, Map<String, Message>> operationsToMessages = new HashMap<Operation, Map<String, Message>>();
+        Map<Operation, QName> operationToPortTypeQNameMap = new HashMap<>();
 
         for(PortType pti : portTypes){
             log.debug("\n\tPort type: "+pti.getQName());
@@ -340,6 +344,7 @@ public class WSDLProcessor {
                 }
 
                 operationsToMessages.put(oper, msgTmpMap);
+                operationToPortTypeQNameMap.put(oper, pti.getQName());
             }
         }
         log.info("\n\tOperations-to-messages map have been built.\n");
@@ -347,6 +352,7 @@ public class WSDLProcessor {
         Map<String, Object> resMap = new HashMap<>();
         resMap.put(PORT_TYPES_PROCESS_OPERATION_LIST, operations);
         resMap.put(PORT_TYPES_PROCESS_OPER_TO_MSGS_MAP, operationsToMessages);
+        resMap.put(PORT_TYPES_OPER_TO_PORT_QNAME, operationToPortTypeQNameMap);
 
         return resMap;
     }
@@ -359,8 +365,8 @@ public class WSDLProcessor {
      * @param wsdlDefinition
      * @return
      */
-    static private Map<String, Object> messagesProcessing(Definition wsdlDefinition){
-        final List<QName> rootWSDLMessageElementNames = new LinkedList<>();
+    static private MessageProcessingResult messagesProcessing(Definition wsdlDefinition){
+        /*final List<QName> rootWSDLMessageElementNames = new LinkedList<>();
         final List<QName> rootWSDLMessageTypeNames = new LinkedList<>();
         final Map<QName, List<Message>> elemQNameToMessage = new HashMap<>();
         final Map<QName, List<Message>> typeQNameToMessage = new HashMap<>();
@@ -369,14 +375,16 @@ public class WSDLProcessor {
         resultMap.put(MESSAGE_PROCESS_ROOT_WSDL_MSG_ELEM_NAMES, rootWSDLMessageElementNames);
         resultMap.put(MESSAGE_PROCESS_ROOT_WSDL_MSG_TYPE_NAMES, rootWSDLMessageTypeNames);
         resultMap.put(MESSAGE_PROCESS_ELEM_QNAME_TO_MSG_MAP, elemQNameToMessage);
-        resultMap.put(MESSAGE_PROCESS_TYPE_QNAME_TO_MSG_MAP, typeQNameToMessage);
+        resultMap.put(MESSAGE_PROCESS_TYPE_QNAME_TO_MSG_MAP, typeQNameToMessage);*/
+
+        MessageProcessingResult result = new MessageProcessingResult();
 
         log.info("Messages processing...");
 
         Map messages = wsdlDefinition.getMessages();
         if(messages == null){
             log.warn("There isn't any message!");
-            return resultMap;
+            return result;
         }
 
         Collection messageObjects = messages.values();
@@ -385,49 +393,77 @@ public class WSDLProcessor {
             log.debug("Processed message: "+message.getQName());
             Map parts = message.getParts();
             Collection partObjects = parts.values();
-            //For simplification we are using only one, the first, part of a message
+
             if( partObjects.isEmpty() ){
                 log.warn(message.getQName()+" does not contain any message part!");
                 continue;
             }
 
-            Part part = (Part) partObjects.iterator().next();
-            if(part.getElementName() != null){
-                QName elemQName = part.getElementName();
-                rootWSDLMessageElementNames.add(elemQName);
-
-                if(elemQNameToMessage.containsKey(elemQName)){
-                    elemQNameToMessage.get(elemQName).add(message);
-
+            for (Object partObj : partObjects) {
+                Part messagePart = (Part) partObj;
+                //Put part to message->part map
+                if (result.getMessageToPart().containsKey(message)) {
+                    result.getMessageToPart().get(message).add(messagePart);
                 } else {
-                    List<Message> tmpMsgLst = new LinkedList<>();
-                    tmpMsgLst.add(message);
-                    elemQNameToMessage.put(elemQName, tmpMsgLst);
-
+                    List<Part> tmpPartList = new LinkedList<>();
+                    tmpPartList.add(messagePart);
+                    result.getMessageToPart().put(message, tmpPartList);
                 }
-                log.debug("Element of part: "+elemQName);
-
-            } else {
-                QName typeQName = part.getTypeName();
-                rootWSDLMessageTypeNames.add(typeQName);
-
-                if(typeQNameToMessage.containsKey(typeQName)){
-                    typeQNameToMessage.get(typeQName).add(message);
-                }else{
-                    List<Message> tmpMsgLst = new LinkedList<>();
-                    tmpMsgLst.add(message);
-                    typeQNameToMessage.put(typeQName, tmpMsgLst);
-                }
-                log.debug("Type of part: "+typeQName);
-
+                //Parse message part
+                processMessagePart(messagePart, result);
             }
 
         }
 
         log.info(messageObjects.size()+" messages have been processed.\n\n");
 
-        return resultMap;
+        return result;
 
+    }
+
+    /**
+     * Auxiliary method that process a WSDL message part object.<br>
+     * Over processing may be filled following result fields:
+     * <ul>
+     *     <li>rootWSDLMessageElementNames</li>
+     *     <li>rootWSDLMessageTypeNames</li>
+     *     <li>elemQNameToPart</li>
+     *     <li>typeQNameToPart</li>
+     * </ul>
+     *
+     * @param messagePart part for processing.
+     * @param result filled over processing by processing results.
+     */
+    private static void processMessagePart(Part messagePart, MessageProcessingResult result) {
+        if(messagePart.getElementName() != null){
+            QName elemQName = messagePart.getElementName();
+            result.getRootWSDLMessageElementNames().add(elemQName);
+
+            if( result.getElemQNameToPart().containsKey(elemQName) ){
+                result.getElemQNameToPart().get(elemQName).add(messagePart);
+
+            } else {
+                List<Part> tmpPartLst = new LinkedList<>();
+                tmpPartLst.add(messagePart);
+                result.getElemQNameToPart().put(elemQName, tmpPartLst);
+
+            }
+            log.debug("Element of part "+messagePart.getName()+": "+elemQName);
+
+        } else {
+            QName typeQName = messagePart.getTypeName();
+            result.getRootWSDLMessageTypeNames().add(typeQName);
+
+            if( result.getTypeQNameToPart().containsKey(typeQName) ){
+                result.getTypeQNameToPart().get(typeQName).add(messagePart);
+            }else{
+                List<Part> tmpPartLst = new LinkedList<>();
+                tmpPartLst.add(messagePart);
+                result.getTypeQNameToPart().put(typeQName, tmpPartLst);
+            }
+            log.debug("Type of part "+messagePart.getName()+": "+typeQName);
+
+        }
     }
 
     static private XmlSchema[] getXmlSchemaCollection(Definition wsdlDefinition){
@@ -450,4 +486,36 @@ public class WSDLProcessor {
         return schemaCol.getXmlSchemas();
     }
 
+
+    //////////
+    /// Private domain classes ///
+    //////////
+    
+    private static class MessageProcessingResult{
+        private final List<QName> rootWSDLMessageElementNames = new LinkedList<>();
+        private final List<QName> rootWSDLMessageTypeNames = new LinkedList<>();
+        private final Map<QName, List<Part>> elemQNameToPart = new HashMap<>();
+        private final Map<QName, List<Part>> typeQNameToPart = new HashMap<>();
+        private final Map<Message, List<Part>> messageToPart = new HashMap<>();
+
+        public List<QName> getRootWSDLMessageElementNames() {
+            return rootWSDLMessageElementNames;
+        }
+
+        public List<QName> getRootWSDLMessageTypeNames() {
+            return rootWSDLMessageTypeNames;
+        }
+
+        public Map<QName, List<Part>> getElemQNameToPart() {
+            return elemQNameToPart;
+        }
+
+        public Map<QName, List<Part>> getTypeQNameToPart() {
+            return typeQNameToPart;
+        }
+
+        public Map<Message, List<Part>> getMessageToPart() {
+            return messageToPart;
+        }
+    }
 }

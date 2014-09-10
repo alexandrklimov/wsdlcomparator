@@ -12,7 +12,7 @@ import java.util.Set;
 
 /**
  * It's auxiliary class.
- * Main goal of this class is reducing a number of model building method parameters and collect
+ * Main goal of this class is reducing a number of parameters of a model building method and collect
  * GroupDescrTable and TypeDescrTable that will be built.<br/>
  *
  * @author Alexandr Klimov

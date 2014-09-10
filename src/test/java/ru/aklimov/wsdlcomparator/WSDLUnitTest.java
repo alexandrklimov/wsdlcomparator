@@ -6,12 +6,16 @@ import org.xml.sax.InputSource;
 import ru.aklimov.wsdlcomparator.domain.CompareResult;
 import ru.aklimov.wsdlcomparator.domain.tblmodel.ModelBuildResult;
 import ru.aklimov.wsdlcomparator.domain.tblmodel.TypeDescrTable;
-import ru.aklimov.wsdlcomparator.domain.tblmodel.WSMethodDescrTable;
+import ru.aklimov.wsdlcomparator.domain.tblmodel.method.WSMethodDescrTable;
 import ru.aklimov.wsdlcomparator.facades.impl.CompFacade;
 import ru.aklimov.wsdlcomparator.facades.impl.MethodModelCreatorFacade;
 import ru.aklimov.wsdlcomparator.facades.impl.TypeModelCreatorFacade;
+import ru.aklimov.wsdlcomparator.modelbuilders.ViewModelCreator;
 
+import javax.wsdl.Definition;
 import javax.wsdl.WSDLException;
+import javax.wsdl.factory.WSDLFactory;
+import javax.wsdl.xml.WSDLReader;
 import java.io.InputStream;
 import java.util.Set;
 
@@ -35,11 +39,23 @@ public class WSDLUnitTest {
 
         ModelBuildResult modelByDiffInfoSet = typeModelCreatorFacade.createModelByDiffInfoSet(compareResult.getTypesDiff(), compareResult.getGroupsDiff());
         Set<WSMethodDescrTable> wsMethods = methodModelCreatorFacade.createWSMethodModelByDiffInfo(compareResult.getWsMethodDiff(), modelByDiffInfoSet.getTableTypeSet(), modelByDiffInfoSet.getTableGroupSet());
-        Set<TypeDescrTable> filteredTables = viewModelCreator.filterTableSetFromWSMethodTypes(modelByDiffInfoSet.getTableTypeSet(), wsMethods);
+        Set<TypeDescrTable> filteredTables = viewModelCreator.filterTableSetFromMessagePartTypes(modelByDiffInfoSet.getTableTypeSet(), wsMethods);
 
         System.out.println(modelByDiffInfoSet);
         System.out.println(wsMethods);
         System.out.println(filteredTables);
+    }
+
+    @Test
+    public void testWSDLProcessorMoreThenOnePart() throws WSDLException {
+        InputStream wsdlInputStream = this.getClass().getResourceAsStream("/wsdl/DeFactoSF1.wsdl");
+        InputSource is = new InputSource(wsdlInputStream);
+
+        WSDLFactory factory = WSDLFactory.newInstance("com.ibm.wsdl.factory.WSDLFactoryImpl");
+        WSDLReader reader = factory.newWSDLReader();
+        Definition definition = reader.readWSDL(null, is);
+
+        WSDLProcessor.processWSDL(definition);
     }
 
 }

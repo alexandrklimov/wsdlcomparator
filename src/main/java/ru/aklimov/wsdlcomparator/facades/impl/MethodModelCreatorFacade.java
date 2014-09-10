@@ -1,11 +1,11 @@
 package ru.aklimov.wsdlcomparator.facades.impl;
 
-import ru.aklimov.wsdlcomparator.ViewModelCreator;
+import ru.aklimov.wsdlcomparator.modelbuilders.ViewModelCreator;
 import ru.aklimov.wsdlcomparator.domain.descriptors.WSMethodDescr;
-import ru.aklimov.wsdlcomparator.domain.diff.impl.DiffWSMethodInfo;
+import ru.aklimov.wsdlcomparator.domain.diff.impl.WSMethodDiffInfo;
 import ru.aklimov.wsdlcomparator.domain.tblmodel.GroupDescrTable;
 import ru.aklimov.wsdlcomparator.domain.tblmodel.TypeDescrTable;
-import ru.aklimov.wsdlcomparator.domain.tblmodel.WSMethodDescrTable;
+import ru.aklimov.wsdlcomparator.domain.tblmodel.method.WSMethodDescrTable;
 import ru.aklimov.wsdlcomparator.facades.IMethodModelCreatorFacade;
 
 import java.util.Set;
@@ -39,7 +39,7 @@ public class MethodModelCreatorFacade implements IMethodModelCreatorFacade{
      * @return
      */
     @Override
-    public Set<WSMethodDescrTable> createWSMethodModelByDiffInfo(Set<DiffWSMethodInfo> wsMethodsDiffs, Set<TypeDescrTable> typeTbls, Set<GroupDescrTable> groupTbls, boolean includeRefGroup, boolean mergeWithBaseType, int deepCount) {
+    public Set<WSMethodDescrTable> createWSMethodModelByDiffInfo(Set<WSMethodDiffInfo> wsMethodsDiffs, Set<TypeDescrTable> typeTbls, Set<GroupDescrTable> groupTbls, boolean includeRefGroup, boolean mergeWithBaseType, int deepCount) {
         return vmc.createWSMethodModelByDiffInfo(wsMethodsDiffs, typeTbls, groupTbls, includeRefGroup, mergeWithBaseType, deepCount);
     }
 
@@ -54,7 +54,7 @@ public class MethodModelCreatorFacade implements IMethodModelCreatorFacade{
      * @return
      */
     @Override
-    public Set<WSMethodDescrTable> createWSMethodModelByDiffInfo(Set<DiffWSMethodInfo> wsMethodsDiffs, Set<TypeDescrTable> typeTbls, Set<GroupDescrTable> groupTbls, boolean includeRefGroup, boolean mergeWithBaseType) {
+    public Set<WSMethodDescrTable> createWSMethodModelByDiffInfo(Set<WSMethodDiffInfo> wsMethodsDiffs, Set<TypeDescrTable> typeTbls, Set<GroupDescrTable> groupTbls, boolean includeRefGroup, boolean mergeWithBaseType) {
         return vmc.createWSMethodModelByDiffInfo(wsMethodsDiffs, typeTbls, groupTbls, includeRefGroup, mergeWithBaseType, DEFAULT_DEEP_COUNT);
     }
 
@@ -69,7 +69,7 @@ public class MethodModelCreatorFacade implements IMethodModelCreatorFacade{
      * @return
      */
     @Override
-    public Set<WSMethodDescrTable> createWSMethodModelByDiffInfo(Set<DiffWSMethodInfo> wsMethodsDiffs, Set<TypeDescrTable> typeTbls, Set<GroupDescrTable> groupTbls, int deepCount) {
+    public Set<WSMethodDescrTable> createWSMethodModelByDiffInfo(Set<WSMethodDiffInfo> wsMethodsDiffs, Set<TypeDescrTable> typeTbls, Set<GroupDescrTable> groupTbls, int deepCount) {
         return vmc.createWSMethodModelByDiffInfo(wsMethodsDiffs, typeTbls, groupTbls, DEFAULT_INCLUDE_REF_GROUP_FLAG, DEFAULT_MERGE_WITH_BASE_TYPE_FLAG, deepCount);
     }
 
@@ -84,7 +84,7 @@ public class MethodModelCreatorFacade implements IMethodModelCreatorFacade{
      * @return
      */
     @Override
-    public Set<WSMethodDescrTable> createWSMethodModelByDiffInfo(Set<DiffWSMethodInfo> wsMethodsDiffs, Set<TypeDescrTable> typeTbls, Set<GroupDescrTable> groupTbls) {
+    public Set<WSMethodDescrTable> createWSMethodModelByDiffInfo(Set<WSMethodDiffInfo> wsMethodsDiffs, Set<TypeDescrTable> typeTbls, Set<GroupDescrTable> groupTbls) {
         return vmc.createWSMethodModelByDiffInfo(wsMethodsDiffs, typeTbls, groupTbls, DEFAULT_INCLUDE_REF_GROUP_FLAG, DEFAULT_MERGE_WITH_BASE_TYPE_FLAG, DEFAULT_DEEP_COUNT);
     }
 
