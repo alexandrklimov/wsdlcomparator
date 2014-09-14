@@ -68,10 +68,10 @@ public class XmlSchemaProcessor {
             xsdTypes.addAll( xsdQNameToTypeMap.values() );
 
             log.debug("Collecting schema root elements into Map( QName->XmlSchemaElement ) ");
-            xsdQNameToElemMap = schema.getElements();
+            xsdQNameToElemMap.putAll( schema.getElements() );
 
             log.debug("Collecting schema group declaration into Map( QName->XmlSchemaGroup ) ");
-            xsdQNameToGroupMap = schema.getGroups();
+            xsdQNameToGroupMap.putAll( schema.getGroups() );
         }
 
         //Find all anonymous type declarations of root elements and owner root element for each type at the same time.

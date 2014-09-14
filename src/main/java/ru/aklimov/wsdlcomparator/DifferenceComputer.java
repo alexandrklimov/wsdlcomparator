@@ -97,7 +97,7 @@ public class DifferenceComputer {
             //Response may be deleted or added
             /////////
             WSMethodDescr oldMethodDescr = tmpOldWSMethodsLst.get(tmpOldWSMethodsLst.indexOf(method));
-            WSMethodDescr newMethodDescr = tmpNewWSMethodsLst.get( tmpOldWSMethodsLst.indexOf(method) );
+            WSMethodDescr newMethodDescr = tmpNewWSMethodsLst.get( tmpNewWSMethodsLst.indexOf(method) );
             if(newMethodDescr.getResponseType()!=null && oldMethodDescr.getResponseType()==null){
                 //RESPONSE HAS BEEN ADDED
                 DiffWSMethodInfo diffMethod = new DiffWSMethodInfo();
