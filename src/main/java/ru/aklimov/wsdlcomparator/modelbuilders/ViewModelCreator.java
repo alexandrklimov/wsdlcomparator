@@ -123,6 +123,8 @@ public class ViewModelCreator {
     /**
      * This method should be used after both types models and groups models have been created, because this method uses these results.
      *
+     * TODO: Some code doubling is in createWSMethodModelByWSMethodDescr method should be reduced.
+     *
      * @param wsMethodsDiffs
      * @param typeTbls may be enriched by new type tables if necessary
      * @param groupTbls may be enriched by new group tables if necessary
@@ -140,17 +142,17 @@ public class ViewModelCreator {
                                                                  final int deepCount){
         Set<WSMethodDescrTable> resSet = new HashSet<>();
 
+        //A single context will be used for message parts processing.
+        //It's possible because the context acts as arguments and processing results container irrelative of
+        //any concrete processed message part or a type of a processed part.
+        final ModelBuildCntx cntx = new ModelBuildCntx(null, null, null, null, typeTbls, groupTbls, mergeWithBaseType, includeRefGroup, deepCount, true);
+
         for(WSMethodDiffInfo diffWSMethod : wsMethodsDiffs){
             WSMethodDescr method = diffWSMethod.getWsMethodDescr();
 
             WSMethodDescrTable tmpWsMethTbl = new WSMethodDescrTable();
             tmpWsMethTbl.setMethodName( method.getMethodName() );
             tmpWsMethTbl.setChangeType( diffWSMethod.getChangeType().toString() );
-
-            //A single context will be used for message parts processing.
-            //It's possible because the context acts as arguments and processing results container irrelative of
-            //any concrete processed message part or a type of a processed part.
-            ModelBuildCntx cntx = new ModelBuildCntx(null, null, null, null, typeTbls, groupTbls, mergeWithBaseType, includeRefGroup, deepCount, true);
 
             List<WSMethodDescr.MessagePartDescr> inputMessage = method.getInputMessage();
             if( ! inputMessage.isEmpty()){
@@ -221,6 +223,11 @@ public class ViewModelCreator {
                                                                       final int deepCount){
         Set<WSMethodDescrTable> resSet = new HashSet<>();
 
+        //A single context will be used for message parts processing.
+        //It's possible because the context acts as arguments and processing results container irrelative of
+        //any concrete processed message part or a type of a processed part.
+        final ModelBuildCntx cntx = new ModelBuildCntx(null, null, null, null, typeTbls, groupTbls, mergeWithBaseType, includeRefGroup, deepCount, true);
+
         for(WSMethodDescr methodDescr : wsMethodDescr){
             WSMethodDescrTable tmpWsMethTbl = new WSMethodDescrTable();
             tmpWsMethTbl.setMethodName(methodDescr.getMethodName());
@@ -228,7 +235,6 @@ public class ViewModelCreator {
             List<WSMethodDescr.MessagePartDescr> inputMessage = methodDescr.getInputMessage();
             if( ! inputMessage.isEmpty()){
                 List<MessagePartDescrTable> messagePartDescrTableLst = new LinkedList<>();
-                ModelBuildCntx cntx = new ModelBuildCntx(null, null, null, null, typeTbls, groupTbls, mergeWithBaseType, includeRefGroup, deepCount, true);
                 for(WSMethodDescr.MessagePartDescr msgPartDescr : inputMessage){
                     MessagePartDescrTable table = MessagePartDescrTableBuilder.createTableByDescr(msgPartDescr, cntx);
                     messagePartDescrTableLst.add(table);
@@ -239,7 +245,6 @@ public class ViewModelCreator {
             List<WSMethodDescr.MessagePartDescr> outputMessage = methodDescr.getOutputMessage();
             if( ! outputMessage.isEmpty()){
                 List<MessagePartDescrTable> messagePartDescrTableLst = new LinkedList<>();
-                ModelBuildCntx cntx = new ModelBuildCntx(null, null, null, null, typeTbls, groupTbls, mergeWithBaseType, includeRefGroup, deepCount, true);
                 for(WSMethodDescr.MessagePartDescr msgPartDescr : outputMessage){
                     MessagePartDescrTable table = MessagePartDescrTableBuilder.createTableByDescr(msgPartDescr, cntx);
                     messagePartDescrTableLst.add(table);
