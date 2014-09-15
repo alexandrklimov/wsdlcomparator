@@ -13,6 +13,8 @@ public class WSMethodDescrTable{
     /**@see ru.aklimov.wsdlcomparator.domain.diff.impl.WSMethodDiffInfo.WSMETHOD_CHANGE_TYPE*/
     private String changeType;
     private List<MessagePartDescrTable> deletedOutputMessage;
+    private String portTypeNamespace;
+    private String portTypeName;
 
 
     @Override
@@ -85,5 +87,21 @@ public class WSMethodDescrTable{
 
     public void setDeletedOutputMessage(List<MessagePartDescrTable> deletedOutputMessage) {
         this.deletedOutputMessage = deletedOutputMessage;
+    }
+
+    public String getPortTypeNamespace() {
+        return portTypeNamespace;
+    }
+
+    public void setPortTypeNamespace(String portTypeNamespace) {
+        this.portTypeNamespace = portTypeNamespace;
+    }
+
+    public String getPortTypeName() {
+        return portTypeName;
+    }
+
+    public void setPortTypeName(String portTypeName) {
+        this.portTypeName = portTypeName;
     }
 }

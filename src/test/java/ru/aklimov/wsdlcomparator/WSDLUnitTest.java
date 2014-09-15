@@ -12,6 +12,7 @@ import ru.aklimov.wsdlcomparator.domain.tblmodel.method.WSMethodDescrTable;
 import ru.aklimov.wsdlcomparator.facades.impl.CompFacade;
 import ru.aklimov.wsdlcomparator.facades.impl.MethodModelCreatorFacade;
 import ru.aklimov.wsdlcomparator.facades.impl.TypeModelCreatorFacade;
+import ru.aklimov.wsdlcomparator.modelbuilders.PostCreationUtils;
 import ru.aklimov.wsdlcomparator.modelbuilders.ViewModelCreator;
 
 import javax.wsdl.Definition;
@@ -41,7 +42,7 @@ public class WSDLUnitTest {
 
         ModelBuildResult modelByDiffInfoSet = typeModelCreatorFacade.createModelByDiffInfoSet(compareResult.getTypesDiff(), compareResult.getGroupsDiff());
         Set<WSMethodDescrTable> wsMethods = methodModelCreatorFacade.createWSMethodModelByDiffInfo(compareResult.getWsMethodDiff(), modelByDiffInfoSet.getTableTypeSet(), modelByDiffInfoSet.getTableGroupSet());
-        Set<TypeDescrTable> filteredTables = viewModelCreator.filterTableSetFromMessagePartTypes(modelByDiffInfoSet.getTableTypeSet(), wsMethods);
+        Set<TypeDescrTable> filteredTables = PostCreationUtils.filterTableSetFromMessagePartTypes(modelByDiffInfoSet.getTableTypeSet(), wsMethods);
 
         System.out.println(modelByDiffInfoSet);
         System.out.println(wsMethods);
