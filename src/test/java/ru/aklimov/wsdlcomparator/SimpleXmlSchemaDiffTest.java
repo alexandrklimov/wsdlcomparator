@@ -1,11 +1,11 @@
 package ru.aklimov.wsdlcomparator;
 
-import ru.aklimov.wsdlcomparator.domain.descriptors.OwnerInfo;
-import ru.aklimov.wsdlcomparator.domain.descriptors.TypeDescriptor;
-import ru.aklimov.wsdlcomparator.domain.diff.impl.TypeDiffInfo;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
+import ru.aklimov.wsdlcomparator.domain.descriptors.OwnerInfo;
+import ru.aklimov.wsdlcomparator.domain.descriptors.TypeDescriptor;
+import ru.aklimov.wsdlcomparator.domain.diff.impl.TypeDiffInfo;
 
 import java.io.InputStream;
 import java.util.List;

@@ -1,12 +1,12 @@
 package ru.aklimov.wsdlcomparator.facades.impl;
 
-import ru.aklimov.wsdlcomparator.modelbuilders.ViewModelCreator;
 import ru.aklimov.wsdlcomparator.domain.descriptors.GroupDescriptor;
 import ru.aklimov.wsdlcomparator.domain.descriptors.TypeDescriptor;
 import ru.aklimov.wsdlcomparator.domain.diff.impl.GroupDiffInfo;
 import ru.aklimov.wsdlcomparator.domain.diff.impl.TypeDiffInfo;
 import ru.aklimov.wsdlcomparator.domain.tblmodel.ModelBuildResult;
 import ru.aklimov.wsdlcomparator.facades.ITypeModelCreatorFacade;
+import ru.aklimov.wsdlcomparator.modelbuilders.ViewModelCreator;
 
 import java.util.Set;
 

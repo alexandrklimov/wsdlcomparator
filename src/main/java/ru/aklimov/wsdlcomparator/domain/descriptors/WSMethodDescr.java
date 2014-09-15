@@ -12,12 +12,12 @@ public class WSMethodDescr {
     private String methodName;
     private List<WSMethodDescr.MessagePartDescr> inputMessage = new LinkedList<>();
     private List<WSMethodDescr.MessagePartDescr> outputMessage = new LinkedList<>();
-    private QName portTypeName;
+    private QName portTypeQName;
 
 
     @Override
     public int hashCode() {
-        return Objects.hash(methodName, portTypeName);
+        return Objects.hash(methodName, portTypeQName);
     }
 
     @Override
@@ -31,7 +31,7 @@ public class WSMethodDescr {
         if(wsMethodDescrObj instanceof WSMethodDescr){
             WSMethodDescr other = (WSMethodDescr) wsMethodDescrObj;
             boolean methodNameEq = (methodName==null && methodName==other.methodName) || ( (methodName!=null && other.methodName!=null) && (methodName.equals(other.methodName)) );
-            boolean portTypeEq = (portTypeName==null && portTypeName==other.portTypeName) || ( (portTypeName!=null && other.portTypeName!=null) && (portTypeName.equals(other.portTypeName)) );
+            boolean portTypeEq = (portTypeQName ==null && portTypeQName ==other.portTypeQName) || ( (portTypeQName !=null && other.portTypeQName !=null) && (portTypeQName.equals(other.portTypeQName)) );
             res = methodNameEq && portTypeEq;
         }
         return res;
@@ -40,7 +40,7 @@ public class WSMethodDescr {
     @Override
     public String toString(){
         StringBuilder sb = new StringBuilder();
-        sb.append("\n\tPORT TYPE NAME "+portTypeName);
+        sb.append("\n\tPORT TYPE NAME "+ portTypeQName);
         sb.append("\n\tWS METHOD "+methodName);
         sb.append("\n\tinputMessage: " + inputMessage.toString());
         sb.append("\n\toutputMessage: " + outputMessage.toString());
@@ -72,12 +72,12 @@ public class WSMethodDescr {
         return outputMessage;
     }
 
-    public QName getPortTypeName() {
-        return portTypeName;
+    public QName getPortTypeQName() {
+        return portTypeQName;
     }
 
-    public void setPortTypeName(QName portTypeName) {
-        this.portTypeName = portTypeName;
+    public void setPortTypeQName(QName portTypeQName) {
+        this.portTypeQName = portTypeQName;
     }
 
 

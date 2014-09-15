@@ -1,17 +1,17 @@
 package ru.aklimov.wsdlcomparator;
 
-import ru.aklimov.wsdlcomparator.domain.DescriptorsContainer;
-import ru.aklimov.wsdlcomparator.domain.ProcessCntx;
-import ru.aklimov.wsdlcomparator.domain.descriptors.GroupDescriptor;
-import ru.aklimov.wsdlcomparator.domain.descriptors.OwnerInfo;
-import ru.aklimov.wsdlcomparator.domain.diff.impl.TypeDiffInfo;
-import ru.aklimov.wsdlcomparator.domain.descriptors.TypeDescriptor;
-import ru.aklimov.wsdlcomparator.domain.XmlSchemaPreprocessRes;
 import org.apache.ws.commons.schema.*;
 import org.apache.ws.commons.schema.constants.Constants;
 import org.apache.ws.commons.schema.resolver.URIResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.aklimov.wsdlcomparator.domain.DescriptorsContainer;
+import ru.aklimov.wsdlcomparator.domain.ProcessCntx;
+import ru.aklimov.wsdlcomparator.domain.XmlSchemaPreprocessRes;
+import ru.aklimov.wsdlcomparator.domain.descriptors.GroupDescriptor;
+import ru.aklimov.wsdlcomparator.domain.descriptors.OwnerInfo;
+import ru.aklimov.wsdlcomparator.domain.descriptors.TypeDescriptor;
+import ru.aklimov.wsdlcomparator.domain.diff.impl.TypeDiffInfo;
 
 import javax.xml.namespace.QName;
 import javax.xml.transform.stream.StreamSource;

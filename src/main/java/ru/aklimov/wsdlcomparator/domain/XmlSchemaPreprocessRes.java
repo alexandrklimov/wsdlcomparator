@@ -1,14 +1,15 @@
 package ru.aklimov.wsdlcomparator.domain;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import org.apache.ws.commons.schema.XmlSchemaElement;
 import org.apache.ws.commons.schema.XmlSchemaGroup;
 import org.apache.ws.commons.schema.XmlSchemaType;
 import ru.aklimov.wsdlcomparator.domain.descriptors.OwnerInfo;
 
 import javax.xml.namespace.QName;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This class contains information about a XSD-schema pre-processing.<br/>

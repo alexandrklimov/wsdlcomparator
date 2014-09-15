@@ -1,12 +1,9 @@
 package ru.aklimov.wsdlcomparator;
 
-import ru.aklimov.wsdlcomparator.domain.DescriptorsContainer;
-import ru.aklimov.wsdlcomparator.domain.descriptors.TypeDescriptor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
-
-import java.util.Set;
+import ru.aklimov.wsdlcomparator.domain.DescriptorsContainer;
 
 @RunWith(BlockJUnit4ClassRunner.class)
 public class XmlProcessingTest {

@@ -1,7 +1,5 @@
 package ru.aklimov.wsdlcomparator.domain.descriptors;
 
-import ru.aklimov.wsdlcomparator.domain.descriptors.AnnotationDescriptor;
-
 import javax.xml.namespace.QName;
 import java.util.LinkedList;
 import java.util.List;

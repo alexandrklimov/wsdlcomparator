@@ -3,7 +3,10 @@ package ru.aklimov.wsdlcomparator.domain.diff.impl;
 import ru.aklimov.wsdlcomparator.domain.descriptors.WSMethodDescr;
 import ru.aklimov.wsdlcomparator.domain.diff.IDiffInfo;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Alexandr Klimov

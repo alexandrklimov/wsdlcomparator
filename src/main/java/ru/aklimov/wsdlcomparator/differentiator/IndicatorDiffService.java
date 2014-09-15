@@ -7,7 +7,10 @@ import org.slf4j.LoggerFactory;
 import ru.aklimov.wsdlcomparator.domain.descriptors.*;
 import ru.aklimov.wsdlcomparator.domain.diff.ChangeInfoDetails;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static ru.aklimov.wsdlcomparator.domain.diff.ChangeInfoDetails.ELEM_OR_ATTR_CHANGE_TYPE.*;
 

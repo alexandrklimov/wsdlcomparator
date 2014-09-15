@@ -2,10 +2,8 @@ package ru.aklimov.wsdlcomparator.differentiator;
 
 import org.apache.commons.collections.ListUtils;
 import ru.aklimov.wsdlcomparator.DifferenceComputer;
-import ru.aklimov.wsdlcomparator.domain.descriptors.TypeDescriptor;
 import ru.aklimov.wsdlcomparator.domain.descriptors.WSMethodDescr;
 import ru.aklimov.wsdlcomparator.domain.diff.impl.TypeDiffInfo;
-import ru.aklimov.wsdlcomparator.domain.diff.impl.WSMethodDiffInfo;
 import ru.aklimov.wsdlcomparator.domain.diff.impl.WsdlMessagePartDiffInfo;
 
 import java.util.HashMap;

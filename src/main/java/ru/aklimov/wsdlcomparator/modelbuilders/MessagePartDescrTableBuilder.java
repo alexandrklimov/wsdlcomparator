@@ -2,7 +2,6 @@ package ru.aklimov.wsdlcomparator.modelbuilders;
 
 import org.apache.commons.collections.ListUtils;
 import ru.aklimov.wsdlcomparator.domain.descriptors.WSMethodDescr;
-import ru.aklimov.wsdlcomparator.domain.diff.impl.TypeDiffInfo;
 import ru.aklimov.wsdlcomparator.domain.diff.impl.WsdlMessagePartDiffInfo;
 import ru.aklimov.wsdlcomparator.domain.tblmodel.ModelBuildCntx;
 import ru.aklimov.wsdlcomparator.domain.tblmodel.TypeDescrTable;

@@ -1,24 +1,24 @@
 package ru.aklimov.wsdlcomparator;
 
-import org.apache.ws.commons.schema.XmlSchemaChoice;
-import ru.aklimov.wsdlcomparator.domain.descriptors.TypeDescriptor;
-import ru.aklimov.wsdlcomparator.domain.descriptors.ElementDescriptor;
-import ru.aklimov.wsdlcomparator.domain.descriptors.IndicatorDescriptor;
-import ru.aklimov.wsdlcomparator.domain.descriptors.ParticleContent;
 import org.apache.ws.commons.schema.XmlSchemaAll;
+import org.apache.ws.commons.schema.XmlSchemaChoice;
 import org.apache.ws.commons.schema.XmlSchemaSequence;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
+import ru.aklimov.wsdlcomparator.domain.descriptors.ElementDescriptor;
+import ru.aklimov.wsdlcomparator.domain.descriptors.IndicatorDescriptor;
+import ru.aklimov.wsdlcomparator.domain.descriptors.ParticleContent;
+import ru.aklimov.wsdlcomparator.domain.descriptors.TypeDescriptor;
 
 import javax.xml.namespace.QName;
-
-import static org.junit.Assert.*;
-
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  *

@@ -1,16 +1,16 @@
 package ru.aklimov.wsdlcomparator;
 
+import org.apache.ws.commons.schema.*;
+import org.apache.ws.commons.schema.constants.Constants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Element;
 import ru.aklimov.wsdlcomparator.domain.DescriptorsContainer;
 import ru.aklimov.wsdlcomparator.domain.ProcessCntx;
 import ru.aklimov.wsdlcomparator.domain.descriptors.GroupDescriptor;
 import ru.aklimov.wsdlcomparator.domain.descriptors.OwnerInfo;
 import ru.aklimov.wsdlcomparator.domain.descriptors.TypeDescriptor;
 import ru.aklimov.wsdlcomparator.domain.descriptors.WSMethodDescr;
-import org.apache.ws.commons.schema.*;
-import org.apache.ws.commons.schema.constants.Constants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Element;
 
 import javax.wsdl.*;
 import javax.wsdl.extensions.schema.Schema;
@@ -29,11 +29,6 @@ public class WSDLProcessor {
     static private final String PORT_TYPES_PROCESS_OPERATION_LIST = "operation_list";
     static private final String PORT_TYPES_PROCESS_OPER_TO_MSGS_MAP = "operations_to_messages";
     static private final String PORT_TYPES_OPER_TO_PORT_QNAME = "operations_to_porttype_qname_map";
-    static private final String MESSAGE_PROCESS_ROOT_WSDL_MSG_ELEM_NAMES = "rootWSDLMessageElementNames";
-    static private final String MESSAGE_PROCESS_ROOT_WSDL_MSG_TYPE_NAMES = "rootWSDLMessageTypeNames";
-    static private final String MESSAGE_PROCESS_ELEM_QNAME_TO_MSG_MAP = "elemQNameToMessage";
-    static private final String MESSAGE_PROCESS_TYPE_QNAME_TO_MSG_MAP = "typeQNameToMessage";
-
 
     static private Logger log = LoggerFactory.getLogger(WSDLProcessor.class);
 
@@ -60,9 +55,7 @@ public class WSDLProcessor {
         MessageProcessingResult messagesProcessingRes = messagesProcessing(definition);
         List<QName> rootWSDLMessageElementQNames = messagesProcessingRes.getRootWSDLMessageElementNames();
         List<QName> rootWSDLMessageTypeQNames = messagesProcessingRes.getRootWSDLMessageTypeNames();
-        //Map<QName, List<Message>> elemQNameToMessage = (Map<QName, List<Message>>) messagesProcessingRes.get(MESSAGE_PROCESS_ELEM_QNAME_TO_MSG_MAP);
         Map<QName, List<Part>> elemQNameToPart = messagesProcessingRes.getElemQNameToPart();
-        //Map<QName, List<Message>> typeQNameToMessage = (Map<QName, List<Message>>) messagesProcessingRes.get(MESSAGE_PROCESS_TYPE_QNAME_TO_MSG_MAP);
         Map<QName, List<Part>> typeQNameToPart = messagesProcessingRes.getTypeQNameToPart();
 
         //XSD schemas obtaining
@@ -215,7 +208,7 @@ public class WSDLProcessor {
 
         for(Operation operation : operationsToMessages.keySet()){
             WSMethodDescr tmpWSMethod = new WSMethodDescr();
-            tmpWSMethod.setPortTypeName( operationToPortTypeQNameMap.get(operation) );
+            tmpWSMethod.setPortTypeQName(operationToPortTypeQNameMap.get(operation));
             tmpWSMethod.setMethodName( operation.getName() );
             log.debug("Method name(Operation name): " + operation.getName() );
 
@@ -263,22 +256,24 @@ public class WSDLProcessor {
      */
     static public class WSDLProcessingResult{
         DescriptorsContainer descriptorContainer;
+
+        /**
+         * TODO: I can see this field isn't used anywhere.
+         * It should be removed after WSDLCabinet application developing will be completed.
+         */
         Map<Operation, Map<String, Message>> operationsToMessages = new HashMap<>();
-        //Map<TypeDescriptor, List<Message>> typeDescriptorToMessage = new HashMap<>();
         Set<WSMethodDescr> wsMethodDescr = new HashSet<>();
 
         /**
          * @param typeDescriptors
          * @param operationsToMessages
-         * @param typeDescriptorToMessage
+         * @param wsMethodDescr
          */
         public WSDLProcessingResult(DescriptorsContainer typeDescriptors,
                                     Map<Operation, Map<String, Message>> operationsToMessages,
-                                    //Map<TypeDescriptor, List<Message>> typeDescriptorToMessage,
                                     Set<WSMethodDescr> wsMethodDescr) {
             this.descriptorContainer = typeDescriptors;
             this.operationsToMessages = operationsToMessages;
-            //this.typeDescriptorToMessage = typeDescriptorToMessage;
             this.wsMethodDescr = wsMethodDescr;
         }
 
@@ -289,10 +284,6 @@ public class WSDLProcessor {
         public Map<Operation, Map<String, Message>> getOperationsToMessages() {
             return operationsToMessages;
         }
-
-       /* public Map<TypeDescriptor, List<Message>> getTypeDescriptorToMessage() {
-            return typeDescriptorToMessage;
-        }*/
 
         public Set<WSMethodDescr> getWsMethodDescr() {
             return wsMethodDescr;
@@ -366,17 +357,6 @@ public class WSDLProcessor {
      * @return
      */
     static private MessageProcessingResult messagesProcessing(Definition wsdlDefinition){
-        /*final List<QName> rootWSDLMessageElementNames = new LinkedList<>();
-        final List<QName> rootWSDLMessageTypeNames = new LinkedList<>();
-        final Map<QName, List<Message>> elemQNameToMessage = new HashMap<>();
-        final Map<QName, List<Message>> typeQNameToMessage = new HashMap<>();
-
-        final HashMap<String, Object> resultMap = new HashMap<>();
-        resultMap.put(MESSAGE_PROCESS_ROOT_WSDL_MSG_ELEM_NAMES, rootWSDLMessageElementNames);
-        resultMap.put(MESSAGE_PROCESS_ROOT_WSDL_MSG_TYPE_NAMES, rootWSDLMessageTypeNames);
-        resultMap.put(MESSAGE_PROCESS_ELEM_QNAME_TO_MSG_MAP, elemQNameToMessage);
-        resultMap.put(MESSAGE_PROCESS_TYPE_QNAME_TO_MSG_MAP, typeQNameToMessage);*/
-
         MessageProcessingResult result = new MessageProcessingResult();
 
         log.info("Messages processing...");

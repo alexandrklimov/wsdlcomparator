@@ -1,18 +1,20 @@
 package ru.aklimov.wsdlcomparator;
 
-import org.apache.ws.commons.schema.utils.XmlSchemaNamedImpl;
-import org.apache.ws.commons.schema.utils.XmlSchemaRef;
-import ru.aklimov.wsdlcomparator.domain.ProcessCntx;
-import ru.aklimov.wsdlcomparator.domain.descriptors.*;
 import org.apache.ws.commons.schema.*;
 import org.apache.ws.commons.schema.constants.Constants;
+import org.apache.ws.commons.schema.utils.XmlSchemaNamedImpl;
+import org.apache.ws.commons.schema.utils.XmlSchemaRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.NodeList;
+import ru.aklimov.wsdlcomparator.domain.ProcessCntx;
+import ru.aklimov.wsdlcomparator.domain.descriptors.*;
 
 import javax.xml.namespace.QName;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This class does XML-schema type processing for a XSD type descriptor building.<br/>

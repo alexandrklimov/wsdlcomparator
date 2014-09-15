@@ -1,19 +1,19 @@
 package ru.aklimov.wsdlcomparator;
 
-import ru.aklimov.wsdlcomparator.domain.DescriptorsContainer;
-import ru.aklimov.wsdlcomparator.domain.descriptors.TypeDescriptor;
-import ru.aklimov.wsdlcomparator.domain.XmlSchemaPreprocessRes;
 import org.apache.ws.commons.schema.XmlSchemaCollection;
 import org.apache.ws.commons.schema.XmlSchemaType;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
+import ru.aklimov.wsdlcomparator.domain.DescriptorsContainer;
+import ru.aklimov.wsdlcomparator.domain.XmlSchemaPreprocessRes;
+import ru.aklimov.wsdlcomparator.domain.descriptors.TypeDescriptor;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.*;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * This test checks XML schemas preprocessing.

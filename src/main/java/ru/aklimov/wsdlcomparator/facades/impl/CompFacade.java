@@ -1,11 +1,11 @@
 package ru.aklimov.wsdlcomparator.facades.impl;
 
+import org.xml.sax.InputSource;
 import ru.aklimov.wsdlcomparator.DifferenceComputer;
 import ru.aklimov.wsdlcomparator.WSDLProcessor;
 import ru.aklimov.wsdlcomparator.domain.CompareResult;
 import ru.aklimov.wsdlcomparator.domain.DiffContainer;
 import ru.aklimov.wsdlcomparator.domain.diff.impl.TypeDiffInfo;
-import org.xml.sax.InputSource;
 import ru.aklimov.wsdlcomparator.facades.ICompFacade;
 
 import javax.wsdl.Definition;

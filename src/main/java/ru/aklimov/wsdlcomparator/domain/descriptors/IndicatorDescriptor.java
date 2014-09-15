@@ -6,7 +6,9 @@ import org.apache.ws.commons.schema.XmlSchemaGroupParticle;
 import org.apache.ws.commons.schema.constants.Constants;
 
 import javax.xml.namespace.QName;
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * This class presents a content of one from following indicators declaration:<br/>

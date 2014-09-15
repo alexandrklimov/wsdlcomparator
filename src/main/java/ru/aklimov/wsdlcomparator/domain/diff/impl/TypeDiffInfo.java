@@ -1,9 +1,9 @@
 package ru.aklimov.wsdlcomparator.domain.diff.impl;
 
-import org.apache.ws.commons.schema.XmlSchemaGroupParticle;
-import ru.aklimov.wsdlcomparator.domain.descriptors.TypeDescriptor;
-import ru.aklimov.wsdlcomparator.domain.descriptors.ParticleContent;
 import org.apache.ws.commons.schema.XmlSchemaAnnotated;
+import org.apache.ws.commons.schema.XmlSchemaGroupParticle;
+import ru.aklimov.wsdlcomparator.domain.descriptors.ParticleContent;
+import ru.aklimov.wsdlcomparator.domain.descriptors.TypeDescriptor;
 import ru.aklimov.wsdlcomparator.domain.diff.ChangeInfoDetails;
 import ru.aklimov.wsdlcomparator.domain.diff.IDiffInfoWithAffected;
 

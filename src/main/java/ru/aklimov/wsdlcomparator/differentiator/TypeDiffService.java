@@ -16,9 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import static ru.aklimov.wsdlcomparator.domain.diff.ChangeInfoDetails.ELEM_OR_ATTR_CHANGE_TYPE.*;
-import static ru.aklimov.wsdlcomparator.domain.diff.impl.TypeDiffInfo.ROOT_GROUP_INDICATOR_DEFINITION_METHOD.BY_REF_TO_GROUP;
-import static ru.aklimov.wsdlcomparator.domain.diff.impl.TypeDiffInfo.ROOT_GROUP_INDICATOR_DEFINITION_METHOD.DIRECTLY;
-import static ru.aklimov.wsdlcomparator.domain.diff.impl.TypeDiffInfo.ROOT_GROUP_INDICATOR_DEFINITION_METHOD.WITHOUT_ROOT_IND;
+import static ru.aklimov.wsdlcomparator.domain.diff.impl.TypeDiffInfo.ROOT_GROUP_INDICATOR_DEFINITION_METHOD.*;
 
 /**
  * @author Alexandr Klimov

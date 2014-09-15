@@ -1,8 +1,6 @@
 package ru.aklimov.wsdlcomparator.domain.tblmodel.method;
 
 
-import ru.aklimov.wsdlcomparator.domain.tblmodel.TypeDescrTable;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;

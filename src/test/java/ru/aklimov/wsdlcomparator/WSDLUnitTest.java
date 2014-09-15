@@ -1,6 +1,8 @@
 package ru.aklimov.wsdlcomparator;
 
 
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.junit.Test;
 import org.xml.sax.InputSource;
 import ru.aklimov.wsdlcomparator.domain.CompareResult;
@@ -55,7 +57,10 @@ public class WSDLUnitTest {
         WSDLReader reader = factory.newWSDLReader();
         Definition definition = reader.readWSDL(null, is);
 
-        WSDLProcessor.processWSDL(definition);
+        WSDLProcessor.WSDLProcessingResult wsdlProcessingResult = WSDLProcessor.processWSDL(definition);
+
+        String infoForOutStr = ReflectionToStringBuilder.reflectionToString(wsdlProcessingResult, ToStringStyle.MULTI_LINE_STYLE);
+        System.out.println("\n\n######################\n\n"+infoForOutStr);
     }
 
 }

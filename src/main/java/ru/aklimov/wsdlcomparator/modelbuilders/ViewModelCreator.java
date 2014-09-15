@@ -1,26 +1,27 @@
 package ru.aklimov.wsdlcomparator.modelbuilders;
 
-import static ru.aklimov.wsdlcomparator.domain.tblmodel.TypeDescrTable.*;
-
 import com.google.common.collect.ImmutableMap;
+import org.apache.commons.collections.ListUtils;
+import org.apache.ws.commons.schema.XmlSchemaContent;
+import org.apache.ws.commons.schema.XmlSchemaFacet;
+import org.apache.ws.commons.schema.XmlSchemaGroupParticle;
+import org.apache.ws.commons.schema.XmlSchemaSimpleTypeContent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.aklimov.wsdlcomparator.domain.descriptors.*;
 import ru.aklimov.wsdlcomparator.domain.diff.ChangeInfoDetails;
-import static ru.aklimov.wsdlcomparator.domain.diff.ChangeInfoDetails.ELEM_OR_ATTR_CHANGE_TYPE;
-
 import ru.aklimov.wsdlcomparator.domain.diff.impl.GroupDiffInfo;
 import ru.aklimov.wsdlcomparator.domain.diff.impl.TypeDiffInfo;
 import ru.aklimov.wsdlcomparator.domain.diff.impl.WSMethodDiffInfo;
-
-import org.apache.commons.collections.ListUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.apache.ws.commons.schema.*;
 import ru.aklimov.wsdlcomparator.domain.tblmodel.*;
 import ru.aklimov.wsdlcomparator.domain.tblmodel.method.MessagePartDescrTable;
 import ru.aklimov.wsdlcomparator.domain.tblmodel.method.WSMethodDescrTable;
 
 import javax.xml.namespace.QName;
 import java.util.*;
+
+import static ru.aklimov.wsdlcomparator.domain.diff.ChangeInfoDetails.ELEM_OR_ATTR_CHANGE_TYPE;
+import static ru.aklimov.wsdlcomparator.domain.tblmodel.TypeDescrTable.*;
 
 /**
  * @author Alexandr Klimov

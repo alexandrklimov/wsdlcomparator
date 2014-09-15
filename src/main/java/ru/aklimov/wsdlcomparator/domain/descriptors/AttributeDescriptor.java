@@ -3,7 +3,6 @@ package ru.aklimov.wsdlcomparator.domain.descriptors;
 import org.apache.ws.commons.schema.constants.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.aklimov.wsdlcomparator.domain.descriptors.TypeDescriptor;
 
 import javax.xml.namespace.QName;
 import java.util.LinkedList;
