@@ -15,6 +15,8 @@ import java.util.*;
  * <br>
  * This class intended for using out of scope a models building process.
  *
+ * TODO: this class is first candidate for JAVA 8 collection processing style. It's small and doesn't contains a complex logic.
+ *
  * @authos Alexandr Klimov
  */
 public class PostCreationUtils {
@@ -163,7 +165,6 @@ public class PostCreationUtils {
         return resMap;
     }
 
-
     /**
      * This auxiliary method extract all ElemAttrDescrRow from an IndicatorDecrRow into flat list in recursive manner.
      *
@@ -190,4 +191,40 @@ public class PostCreationUtils {
 
         return resLst;
     }
+
+
+    /**
+     * This auxiliary method groups method tables by its PortType.
+     * <br>
+     * <br>
+     * A method description table represents a WSDL operation definition.
+     * <br>
+     * Each operation definition belongs to some PortType definition.
+     * <br>
+     * <br>
+     * This method returns a map (PORT_TYPE_NAME -> List_of_WSMethodDescrTable).
+     *
+     * @param methodTbls set of tables for processing
+     * @return map (PORT_TYPE_NAME -> List_of_WSMethodDescrTable)
+     */
+    public static Map<String, List<WSMethodDescrTable>> groupMethodsByPortType(Set<WSMethodDescrTable> methodTbls){
+        Map<String, List<WSMethodDescrTable>> resMap = new HashMap<>();
+
+        for(WSMethodDescrTable methodTbl : methodTbls){
+            String key = methodTbl.getPortTypeName();
+
+            if( resMap.containsKey(key) ){
+                resMap.get(key).add(methodTbl);
+
+            } else {
+                List<WSMethodDescrTable> tmpLst = new LinkedList<>();
+                tmpLst.add(methodTbl);
+                resMap.put(key, tmpLst);
+
+            }
+        }
+
+        return resMap;
+    }
+
 }

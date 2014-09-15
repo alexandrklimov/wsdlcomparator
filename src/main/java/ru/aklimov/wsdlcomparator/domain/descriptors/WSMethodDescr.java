@@ -6,7 +6,18 @@ import java.util.List;
 import java.util.Objects;
 
 /**
-*@author Alexandr Klimov
+ * This class describe a <strog>WSDL operation</strog> definition.
+ * <br>
+ * <br>
+ * Each operation definition belongs to some <strong>WSDL portType</strong> definition.
+ * <br>
+ * A <strong>WSDL portType</strong> is a kind of an interface declaration.
+ * <br>
+ * A WSDL may contain a set of such "interface" declaration - each for appropriate purpose.
+ * F.e.: they may be for realisation of different <strong>WSDL binding</strong>.
+ *
+ *
+ * @author Alexandr Klimov
  */
 public class WSMethodDescr {
     private String methodName;
