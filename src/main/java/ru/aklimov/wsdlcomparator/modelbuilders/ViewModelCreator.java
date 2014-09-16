@@ -241,7 +241,7 @@ public class ViewModelCreator {
                     MessagePartDescrTable table = MessagePartDescrTableBuilder.createTableByDescr(msgPartDescr, cntx);
                     messagePartDescrTableLst.add(table);
                 }
-
+                tmpWsMethTbl.setInputMessage(messagePartDescrTableLst);
             }
 
             List<WSMethodDescr.MessagePartDescr> outputMessage = methodDescr.getOutputMessage();
@@ -251,7 +251,7 @@ public class ViewModelCreator {
                     MessagePartDescrTable table = MessagePartDescrTableBuilder.createTableByDescr(msgPartDescr, cntx);
                     messagePartDescrTableLst.add(table);
                 }
-
+                tmpWsMethTbl.setOutputMessage(messagePartDescrTableLst);
             }
 
             resSet.add(tmpWsMethTbl);
@@ -909,7 +909,7 @@ public class ViewModelCreator {
         ElemAttrDescrRow groupRefDescrRow = new ElemAttrDescrRow();
 
         groupRefDescrRow.setRefToGroup(true);
-        groupRefDescrRow.setRefGroupId( Utils.GROUP_TABLE_ID_PREFIX + gf.getRef().toString() );
+        groupRefDescrRow.setRefGroupId( Constants.GROUP_TABLE_ID_PREFIX + gf.getRef().toString() );
 
         //set cardinality info
         groupRefDescrRow.getMetaInfo().put(ElemAttrDescrRow.META_GROUP_REF_MIN_OCCURS, gf.getMinOccurs());

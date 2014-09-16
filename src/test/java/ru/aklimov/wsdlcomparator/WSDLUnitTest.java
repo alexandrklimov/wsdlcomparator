@@ -60,8 +60,18 @@ public class WSDLUnitTest {
 
         WSDLProcessor.WSDLProcessingResult wsdlProcessingResult = WSDLProcessor.processWSDL(definition);
 
-        String infoForOutStr = ReflectionToStringBuilder.reflectionToString(wsdlProcessingResult, ToStringStyle.MULTI_LINE_STYLE);
-        System.out.println("\n\n######################\n\n"+infoForOutStr);
+        ModelBuildResult modelBySet = typeModelCreatorFacade.createModelBySet(
+                wsdlProcessingResult.getDescriptorContainer().getTypeDescriptors(),
+                wsdlProcessingResult.getDescriptorContainer().getGroupDescriptors()
+        );
+
+        Set<WSMethodDescrTable> wsMethodModelByWSMethodDescr = methodModelCreatorFacade.createWSMethodModelByWSMethodDescr(
+                wsdlProcessingResult.getWsMethodDescr(),
+                modelBySet.getTableTypeSet(),
+                modelBySet.getTableGroupSet()
+        );
+
+        Set<TypeDescrTable> filteredTables = PostCreationUtils.filterTableSetFromMessagePartTypes(modelBySet.getTableTypeSet(), wsMethodModelByWSMethodDescr);
     }
 
 }

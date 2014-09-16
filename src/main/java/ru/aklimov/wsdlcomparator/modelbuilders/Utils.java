@@ -20,19 +20,17 @@ import java.util.Set;
  * @author Alexandr Klimov
  */
 class Utils {
-    static final String GROUP_TABLE_ID_PREFIX = "group_table|";
-    static final String TYPE_TABLE_ID_PREFIX = "type_table|";
 
     static String getIndicatorName(Class<? extends XmlSchemaGroupParticle> groupParticleType){
         return groupParticleType.getSimpleName().replace("XmlSchema", "");
     }
 
     static String buildGroupDescrTableId(GroupDescriptor gd){
-        return GROUP_TABLE_ID_PREFIX + gd.getId();
+        return Constants.GROUP_TABLE_ID_PREFIX + gd.getId();
     }
 
     static String buildTypeDescrTableId(TypeDescriptor td){
-        return TYPE_TABLE_ID_PREFIX + td.getId();
+        return Constants.TYPE_TABLE_ID_PREFIX + td.getId();
     }
 
     /**
