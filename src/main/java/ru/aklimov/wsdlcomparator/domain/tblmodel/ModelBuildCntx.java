@@ -28,7 +28,16 @@ public class ModelBuildCntx {
     private boolean mergeWithBaseType;
     /**Whether content of a group should be displayed in a scope built model row.*/
     private boolean includeRefGroup;
+    /**
+     * Force create a type description table for base XSD types (string, decimal and so on).
+     * Is useful during WSDL message part processing
+     * */
+    private boolean mustCreateBaseXSDTypeTblDescr;
     private int deepCount;
+
+    //////////
+    /// methods
+    //////////
 
     /**
      * @param td
@@ -165,5 +174,13 @@ public class ModelBuildCntx {
 
     public void setGd(GroupDescriptor gd) {
         this.gd = gd;
+    }
+
+    public boolean isMustCreateBaseXSDTypeTblDescr() {
+        return mustCreateBaseXSDTypeTblDescr;
+    }
+
+    public void setMustCreateBaseXSDTypeTblDescr(boolean mustCreateBaseXSDTypeTblDescr) {
+        this.mustCreateBaseXSDTypeTblDescr = mustCreateBaseXSDTypeTblDescr;
     }
 }

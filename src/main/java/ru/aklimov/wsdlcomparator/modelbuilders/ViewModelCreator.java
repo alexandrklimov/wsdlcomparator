@@ -317,8 +317,16 @@ public class ViewModelCreator {
         }
 
         //A tables for base XSD types will not be created (f.e. string, decimal and so on)
-        if(!td.isBaseXsdType()){
-            log.debug("isBaseXsdType = FALSE");
+        //if there isn't force flag in the context
+        if(td.isBaseXsdType() && !cntx.isMustCreateBaseXSDTypeTblDescr()){
+            if(log.isDebugEnabled()){
+                String logMsg = "Force-flag isn't set in the processing context.\n";
+                logMsg += td.getName() + " base XSD type description table won't be created";
+                log.debug(logMsg);
+            }
+
+        } else {
+            log.debug("isBaseXsdType = "+td.isBaseXsdType());
 
             TypeDescrTable table = new TypeDescrTable();
             table.setId( Utils.buildTypeDescrTableId(td) );
@@ -331,17 +339,19 @@ public class ViewModelCreator {
                 //if the type is not a one of a root element
                 TypeDescriptor ownTd = td.getOwnerInfoLst().get(0).getTypeDescriptor();
                 String ownElemName = td.getOwnerInfoLst().get(0).getElemName();
+                table.setOwnerElementName( ownElemName );
                 if(ownTd!=null){
                     table.setOwnerTableId( Utils.buildTypeDescrTableId(ownTd) );
-                    table.setOwnerElementName( ownElemName );
                     table.setOwnerTableTitle( createTableTitle(ownTd));
                 }
 
             }
 
-            if(td.getBaseTypeQName()!=null){
-                boolean baseIsBaseXsd = td.getBaseType().isBaseXsdType();
-                table.setBaseTypeIsBaseXsdType(baseIsBaseXsd);
+            if(td.getBaseTypeQName() != null){
+                if (td.getBaseType() != null) {
+                    boolean baseIsBaseXsd = td.getBaseType().isBaseXsdType();
+                    table.setBaseTypeIsBaseXsdType(baseIsBaseXsd);
+                }
                 table.setBaseTypeTableId( td.getBaseTypeQName().toString() );
                 table.setBaseTypeName( td.getBaseTypeQName().getLocalPart() );
             }

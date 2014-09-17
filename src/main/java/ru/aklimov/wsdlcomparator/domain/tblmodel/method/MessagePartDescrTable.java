@@ -19,7 +19,7 @@ public class MessagePartDescrTable {
     private boolean xsdSchemaBindingChanged;
     private boolean typeChanged;
     private TypeDescrTable oldTypeDescr;
-    private MessagePartDescrTable deletedPart;
+    private MessagePartDescrTable deletedPart;//<- FIXME: WTF?!
 
 
     public String getName() {

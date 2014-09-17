@@ -52,14 +52,11 @@ public class MessagePartDescrTableBuilder {
         }
 
         TypeDescrTable typeDescrTable = ViewModelCreator.findTypeDescrTableByTd(wmpdf.getMsgPart().getTypeDescr(), cntx.getTableTypeSet());
-        if(typeDescrTable != null){
-            table.setTypeDescr(typeDescrTable);
-
-        } else {
+        if(typeDescrTable == null){
             ModelBuildCntx newCntx = cntx.switchContextForNewTd(wmpdf.getMsgPart().getTypeDescr(), cntx.getDeepCount());
-            TypeDescrTable modelNewTd = getModelByNewTd(newCntx);
-            table.setTypeDescr(modelNewTd);
+            typeDescrTable = getModelByNewTd(newCntx);
         }
+        table.setTypeDescr(typeDescrTable);
 
         return table;
 
@@ -82,6 +79,7 @@ public class MessagePartDescrTableBuilder {
 
         } else {
             ModelBuildCntx newCntx = cntx.switchContextForNewTd(messagePartDescr.getTypeDescr(), cntx.getDeepCount());
+            newCntx.setMustCreateBaseXSDTypeTblDescr(true);
             TypeDescrTable modelByNewTd = getModelByNewTd(newCntx);
             table.setTypeDescr(modelByNewTd);
         }
